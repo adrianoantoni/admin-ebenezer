@@ -7,7 +7,7 @@
       "config": { "distDir": "dist" }
     },
     {
-      "src": "server/index.ts",
+      "src": "server/main.ts",
       "use": "@vercel/node"
     },
     {
@@ -22,11 +22,11 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "server/index.ts"
+      "dest": "server/main.ts"
     },
     {
       "src": "/health",
-      "dest": "server/index.ts"
+      "dest": "server/main.ts"
     },
     {
       "src": "/(.*)",
