@@ -1,9 +1,9 @@
 import express from 'express';
 const { Router } = express;
 import type { Request, Response, NextFunction } from 'express';
-import prisma from '../db.ts';
-import { authenticateToken } from '../middleware/auth.ts';
-import { logAudit } from '../utils/audit.ts';
+import prisma from '../db';
+import { authenticateToken } from '../middleware/auth';
+import { logAudit } from '../utils/audit';
 
 const router = Router();
 

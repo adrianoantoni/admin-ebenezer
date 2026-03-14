@@ -1,23 +1,23 @@
-import './loadEnv.ts';
+import './loadEnv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import authRoutes from './routes/auth.ts';
-import membersRoutes from './routes/members.ts';
-import financeRoutes from './routes/finance.ts';
-import inventoryRoutes from './routes/inventory.ts';
-import eventRoutes from './routes/events.ts';
-import departmentRoutes from './routes/departments.ts';
-import marriageRoutes from './routes/marriages.ts';
-import schoolRoutes from './routes/school.ts';
-import libraryRoutes from './routes/library.ts';
-import settingsRoutes from './routes/settings.ts';
-import socialRoutes from './routes/social.ts';
-import usersRoutes from './routes/users.ts';
-import fiscalYearRoutes from './routes/fiscal-year.ts';
-import auditRoutes from './routes/audit.ts';
-import { authenticateToken } from './middleware/auth.ts';
-import { errorHandler } from './middleware/error.ts';
+import authRoutes from './routes/auth';
+import membersRoutes from './routes/members';
+import financeRoutes from './routes/finance';
+import inventoryRoutes from './routes/inventory';
+import eventRoutes from './routes/events';
+import departmentRoutes from './routes/departments';
+import marriageRoutes from './routes/marriages';
+import schoolRoutes from './routes/school';
+import libraryRoutes from './routes/library';
+import settingsRoutes from './routes/settings';
+import socialRoutes from './routes/social';
+import usersRoutes from './routes/users';
+import fiscalYearRoutes from './routes/fiscal-year';
+import auditRoutes from './routes/audit';
+import { authenticateToken } from './middleware/auth';
+import { errorHandler } from './middleware/error';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -80,7 +80,7 @@ app.get('/api/diag', async (req, res) => {
     };
 
     try {
-        const prismaImport = await import('./db.ts');
+        const prismaImport = await import('./db');
         const prismaClient = prismaImport.default;
         await (prismaClient as any).$queryRaw`SELECT 1`;
         diag.db = 'CONNECTED';

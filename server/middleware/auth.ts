@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getJwtSecret } from '../loadEnv.ts';
+import { getJwtSecret } from '../loadEnv';
 
 export interface AuthRequest extends Request {
     user?: {

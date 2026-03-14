@@ -8,6 +8,7 @@
     "server": "tsx --watch server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "prisma generate && vite build",
+    "postinstall": "prisma generate",
     "preview": "vite preview"
   },
   "prisma": {
