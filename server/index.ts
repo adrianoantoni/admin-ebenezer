@@ -29,7 +29,7 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: ["'self'", "data:", "blob:"],
-            connectSrc: ["'self'", "http://127.0.0.1:3001", "https://generativelanguage.googleapis.com"],
+            connectSrc: ["'self'", "https://*.vercel.app", "https://generativelanguage.googleapis.com"],
             fontSrc: ["'self'"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
@@ -101,6 +101,11 @@ app.get('/api/test-proxy', (req, res) => {
 // Centralized Error Handling
 app.use(errorHandler);
 
-app.listen(Number(PORT), '127.0.0.1', () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
-});
+// Initializing server only if NOT running as Vercel serverless function
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(Number(PORT), '127.0.0.1', () => {
+        console.log(`Server running on http://127.0.0.1:${PORT}`);
+    });
+}
+
+export default app;
