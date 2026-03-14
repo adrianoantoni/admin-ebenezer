@@ -1,4 +1,4 @@
-import './loadEnv';
+// import './loadEnv';
 import express from 'express';
 
 const app = express();
