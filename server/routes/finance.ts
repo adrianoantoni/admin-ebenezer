@@ -1,9 +1,9 @@
 import express from 'express';
 const { Router } = express;
 import type { Request, Response, NextFunction } from 'express';
-import prisma from '../db';
-import { authenticateToken } from '../middleware/auth';
-import { logAudit } from '../utils/audit';
+import prisma from '../db.js';
+import { authenticateToken } from '../middleware/auth.js';
+import { logAudit } from '../utils/audit.js';
 
 const router = Router();
 
