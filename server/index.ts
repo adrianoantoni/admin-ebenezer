@@ -2,6 +2,7 @@ import './loadEnv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+/*
 import authRoutes from './routes/auth';
 import membersRoutes from './routes/members';
 import financeRoutes from './routes/finance';
@@ -16,6 +17,7 @@ import socialRoutes from './routes/social';
 import usersRoutes from './routes/users';
 import fiscalYearRoutes from './routes/fiscal-year';
 import auditRoutes from './routes/audit';
+*/
 import { authenticateToken } from './middleware/auth';
 import { errorHandler } from './middleware/error';
 
@@ -41,6 +43,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
+/*
 app.use('/api/auth', authRoutes);
 app.use('/api/members', membersRoutes);
 app.use('/api/finance', financeRoutes);
@@ -55,6 +58,7 @@ app.use('/api/social', socialRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/fiscal-years', fiscalYearRoutes);
 app.use('/api/audit', auditRoutes);
+*/
 
 // Protected Sample Route
 app.get('/api/auth/me', authenticateToken, (req, res) => {
