@@ -3,12 +3,12 @@ const { Router } = express;
 import type { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../db';
-import { getJwtSecret } from '../loadEnv';
-import { authenticateToken } from '../middleware/auth';
+import prisma from '../db.js';
+import { getJwtSecret } from '../loadEnv.js';
+import { authenticateToken } from '../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
-import { sendResetPasswordEmail } from '../utils/email.service';
-import { logAudit } from '../utils/audit';
+import { sendResetPasswordEmail } from '../utils/email.service.js';
+import { logAudit } from '../utils/audit.js';
 
 const router = Router();
 

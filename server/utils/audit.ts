@@ -1,4 +1,4 @@
-import prisma from '../db';
+import prisma from '../db.js';
 
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'PASSWORD_RESET' | 'EXPORT' | 'ANNUL';
 export type AuditEntity = 'USER' | 'MEMBER' | 'TRANSACTION' | 'ASSET' | 'MARRIAGE' | 'EVENT' | 'SETTING' | 'SCHOOL_CLASS' | 'CELL';
