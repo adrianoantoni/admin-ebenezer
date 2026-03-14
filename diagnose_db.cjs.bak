@@ -1,0 +1,25 @@
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function main() {
+    try {
+        const count = await prisma.membro.count();
+        console.log(`--- DIAGNÓSTICO ---`);
+        console.log(`Total de membros no banco: ${count}`);
+
+        if (count > 0) {
+            const members = await prisma.membro.findMany({ take: 5 });
+            console.log('Primeiros 5 membros:');
+            members.forEach((m, i) => console.log(`${i + 1}. ${m.nomeCompleto} (ID: ${m.idMembro})`));
+        }
+
+        const users = await prisma.usuario.count();
+        console.log(`Total de usuários: ${users}`);
+    } catch (e) {
+        console.error('ERRO NO DIAGNÓSTICO:', e);
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
+main();

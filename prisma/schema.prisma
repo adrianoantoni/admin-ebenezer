@@ -1,0 +1,507 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  idUsuario               String                   @id @default(uuid()) @db.Uuid
+  nome                    String                   @db.VarChar(150)
+  email                   String                   @unique @db.VarChar(120)
+  senha                   String                   @db.VarChar(255)
+  perfil                  Perfil                   @default(MEMBRO)
+  status                  Boolean                  @default(true)
+  criadoEm                DateTime                 @default(now()) @map("criado_em")
+  atualizadoEm            DateTime                 @updatedAt @map("atualizado_em")
+  resetToken              String?                  @map("reset_token") @db.VarChar(255)
+  resetTokenExpiry        DateTime?                @map("reset_token_expiry")
+  ultimoLogin             DateTime?                @map("ultimo_login")
+  twoFactorSecret         String?                  @map("two_factor_secret") @db.VarChar(255)
+  twoFactorEnabled        Boolean                  @default(false) @map("two_factor_enabled")
+  twoFactorBackupCodes    String?                  @map("two_factor_backup_codes")
+  sessionId               String?                  @map("session_id") @db.VarChar(255)
+  browserFingerprint      String?                  @map("browser_fingerprint") @db.VarChar(255)
+  photoUrl                String?                  @map("photo_url")
+  auditLogs               AuditLog[]
+  membro                  Membro?
+  movimentacoesPatrimonio PatrimonioMovimentacao[]
+  refreshTokens           RefreshToken[]
+  dizimosRegistrados      Dizimo[]
+  ofertasRegistradas      Oferta[]
+  saidasRegistradas       Saida[]
+
+  @@map("usuarios")
+}
+
+model Membro {
+  idMembro                String                   @id @default(uuid()) @db.Uuid
+  idUsuario               String?                  @unique @db.Uuid
+  nomeCompleto            String                   @map("nome_completo") @db.VarChar(150)
+  dataNascimento          DateTime?                @map("data_nascimento") @db.Date
+  genero                  Genero?
+  estadoCivil             String?                  @map("estado_civil") @db.VarChar(50)
+  telefone                String?                  @db.VarChar(50)
+  email                   String?                  @db.VarChar(120)
+  endereco                String?
+  dataBatismo             DateTime?                @map("data_batismo") @db.Date
+  dataConversao           DateTime?                @map("data_conversao") @db.Date
+  
+  // Campos Adicionados
+  bi                      String?                  @db.VarChar(30)
+  naturalidade            String?                  @db.VarChar(100)
+  provincia               String?                  @db.VarChar(100)
+  situacaoProfissional    String?                  @map("situacao_profissional") @db.VarChar(100)
+  profissao               String?                  @db.VarChar(100)
+  escolaridade            String?                  @db.VarChar(100)
+  categoria               String?                  @db.VarChar(100)
+  ministerio              String?                  @db.VarChar(100)
+  valorDizimoEsperado     Decimal                  @default(0) @map("valor_dizimo_esperado") @db.Decimal(10, 2)
+  
+  orfaoDePai              Boolean                  @default(false) @map("orfao_de_pai")
+  orfaoDeMae              Boolean                  @default(false) @map("orfao_de_mae")
+  
+  ativo                   Boolean                  @default(true)
+  fotoPerfil              String?                  @map("foto_perfil")
+  criadoEm                DateTime                 @default(now()) @map("criado_em")
+  atualizadoEm            DateTime                 @updatedAt @map("atualizado_em")
+  dizimos                 Dizimo[]
+  eventosResponsavel      Evento[]                 @relation("ResponsavelEvento")
+  livrosEmprestados       LivroEmprestimo[]
+  ministeriosMembro       MembroMinisterio[]
+  usuario                 Usuario?                 @relation(fields: [idUsuario], references: [idUsuario])
+  ministeriosLiderados    Ministerio[]             @relation("LiderMinisterio")
+  ofertas                 Oferta[]
+  patrimoniosResponsavel  Patrimonio[]
+  movimentacoesAnteriores PatrimonioMovimentacao[] @relation("MovimentacaoAnterior")
+  movimentacoesNovas      PatrimonioMovimentacao[] @relation("MovimentacaoNovo")
+  presencas               PresencaEvento[]
+
+  @@map("membros")
+}
+
+model AnoFiscal {
+  idAno       String   @id @default(uuid()) @db.Uuid
+  ano         Int      @unique
+  ativo       Boolean  @default(false)
+  descricao   String?
+  criadoEm    DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+  dizimos     Dizimo[]
+  saidas      Saida[]
+
+  @@map("anos_fiscais")
+}
+
+model Dizimo {
+  idDizimo        String          @id @default(uuid()) @db.Uuid
+  idMembro        String          @map("id_membro") @db.Uuid
+  valor           Decimal         @db.Decimal(10, 2)
+  data            DateTime        @db.Date
+  dataReferencia  DateTime        @default(now()) @map("data_referencia") @db.Date
+  metodoPagamento MetodoPagamento @map("metodo_pagamento")
+  status          String          @default("PAGO") // PAGO, PENDENTE, ATRASADO
+  observacao      String?
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+  atualizadoEm    DateTime        @updatedAt @map("atualizado_em")
+  membro          Membro          @relation(fields: [idMembro], references: [idMembro])
+  idUsuario       String?         @map("id_usuario") @db.Uuid
+  usuario         Usuario?        @relation(fields: [idUsuario], references: [idUsuario])
+  idAnoFiscal     String?         @map("id_ano_fiscal") @db.Uuid
+  anoFiscal       AnoFiscal?      @relation(fields: [idAnoFiscal], references: [idAno])
+
+  @@map("dizimos")
+}
+
+model Oferta {
+  idOferta     String     @id @default(uuid()) @db.Uuid
+  idMembro     String?    @map("id_membro") @db.Uuid
+  valor        Decimal    @db.Decimal(10, 2)
+  tipo         TipoOferta
+  data         DateTime   @db.Date
+  observacao   String?
+  criadoEm     DateTime   @default(now()) @map("criado_em")
+  atualizadoEm DateTime   @updatedAt @map("atualizado_em")
+  membro       Membro?    @relation(fields: [idMembro], references: [idMembro])
+  idUsuario    String?    @map("id_usuario") @db.Uuid
+  usuario      Usuario?   @relation(fields: [idUsuario], references: [idUsuario])
+
+  @@map("ofertas")
+}
+
+model Saida {
+  idSaida         String          @id @default(uuid()) @db.Uuid
+  valor           Decimal         @db.Decimal(10, 2)
+  categoria       String          @db.VarChar(100)
+  data            DateTime        @db.Date
+  metodoPagamento MetodoPagamento @map("metodo_pagamento")
+  observacao      String?
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+  atualizadoEm    DateTime        @updatedAt @map("atualizado_em")
+  idUsuario       String?         @map("id_usuario") @db.Uuid
+  usuario         Usuario?        @relation(fields: [idUsuario], references: [idUsuario])
+  idAnoFiscal     String?         @map("id_ano_fiscal") @db.Uuid
+  anoFiscal       AnoFiscal?      @relation(fields: [idAnoFiscal], references: [idAno])
+
+  @@map("saidas")
+}
+
+model Ministerio {
+  idMinisterio  String             @id @default(uuid()) @db.Uuid
+  nome          String             @db.VarChar(100)
+  descricao     String?
+  lider         String?            @db.Uuid
+  ativo         Boolean            @default(true)
+  criadoEm      DateTime           @default(now()) @map("criado_em")
+  atualizadoEm  DateTime           @updatedAt @map("atualizado_em")
+  membros       MembroMinisterio[]
+  liderRelacion Membro?            @relation("LiderMinisterio", fields: [lider], references: [idMembro])
+
+  @@map("ministerios")
+}
+
+model Evento {
+  idEvento            String           @id @default(uuid()) @db.Uuid
+  nome                String           @db.VarChar(150)
+  dataInicio          DateTime         @map("data_inicio") @db.Date
+  dataFim             DateTime?        @map("data_fim") @db.Date
+  local               String?          @db.VarChar(150)
+  descricao           String?
+  responsavel         String?          @db.Uuid
+  ativo               Boolean          @default(true)
+  criadoEm            DateTime         @default(now()) @map("criado_em")
+  atualizadoEm        DateTime         @updatedAt @map("atualizado_em")
+  responsavelRelacion Membro?          @relation("ResponsavelEvento", fields: [responsavel], references: [idMembro])
+  presencas           PresencaEvento[]
+
+  @@map("eventos")
+}
+
+model PresencaEvento {
+  idPresenca   String   @id @default(uuid()) @db.Uuid
+  idEvento     String   @map("id_evento") @db.Uuid
+  idMembro     String   @map("id_membro") @db.Uuid
+  presente     Boolean  @default(false)
+  dataRegistro DateTime @default(now()) @map("data_registro")
+  evento       Evento   @relation(fields: [idEvento], references: [idEvento])
+  membro       Membro   @relation(fields: [idMembro], references: [idMembro])
+
+  @@unique([idEvento, idMembro])
+  @@map("presencas_eventos")
+}
+
+model Visitante {
+  idVisitante  String   @id @default(uuid()) @db.Uuid
+  nome         String   @db.VarChar(150)
+  telefone     String?  @db.VarChar(50)
+  email        String?  @db.VarChar(120)
+  dataVisita   DateTime @map("data_visita") @db.Date
+  observacao   String?
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("visitantes")
+}
+
+model MembroMinisterio {
+  idMembro     String     @map("id_membro") @db.Uuid
+  idMinisterio String     @map("id_ministerio") @db.Uuid
+  dataEntrada  DateTime   @default(now()) @map("data_entrada")
+  ativo        Boolean    @default(true)
+  membro       Membro     @relation(fields: [idMembro], references: [idMembro])
+  ministerio   Ministerio @relation(fields: [idMinisterio], references: [idMinisterio])
+
+  @@id([idMembro, idMinisterio])
+  @@map("membro_ministerio")
+}
+
+model AuditLog {
+  idLog           String      @id @default(uuid()) @db.Uuid
+  usuarioId       String      @db.Uuid
+  acao            String      @db.VarChar(100)
+  entidade        String      @db.VarChar(50)
+  entidadeId      String?
+  dadosAnteriores Json?
+  dadosNovos      Json?
+  ipAddress       String?     @db.VarChar(45)
+  userAgent       String?
+  timestamp       DateTime    @default(now())
+  status          AuditStatus @default(SUCCESS)
+  usuario         Usuario     @relation(fields: [usuarioId], references: [idUsuario])
+
+  @@index([usuarioId])
+  @@index([entidade])
+  @@index([timestamp])
+  @@index([acao])
+  @@map("audit_logs")
+}
+
+model PatrimonioCategoria {
+  idCategoria String       @id @default(uuid()) @db.Uuid
+  nome        String       @unique @db.VarChar(100)
+  descricao   String?
+  ativo       Boolean      @default(true)
+  criadoEm    DateTime     @default(now()) @map("criado_em")
+  patrimonios Patrimonio[]
+
+  @@map("patrimonio_categorias")
+}
+
+model Patrimonio {
+  idPatrimonio      String                   @id @default(uuid()) @db.Uuid
+  idCategoria       String                   @db.Uuid
+  nome              String                   @db.VarChar(150)
+  descricao         String?
+  codigoInventario  String                   @unique @map("codigo_inventario") @db.VarChar(50)
+  valorAquisicao    Decimal                  @map("valor_aquisicao") @db.Decimal(14, 2)
+  dataAquisicao     DateTime                 @map("data_aquisicao") @db.Date
+  vidaUtilAnos      Int                      @default(5) @map("vida_util_anos")
+  valorResidual     Decimal                  @default(0) @map("valor_residual") @db.Decimal(14, 2)
+  estadoConservacao EstadoConservacao        @default(Bom) @map("estado_conservacao")
+  localizacao       String                   @db.VarChar(120)
+  idResponsavel     String?                  @db.Uuid
+  origem            OrigemPatrimonio         @default(Compra)
+  ativo             Boolean                  @default(true)
+  criadoEm          DateTime                 @default(now()) @map("criado_em")
+  atualizadoEm      DateTime                 @updatedAt @map("atualizado_em")
+  categoria         PatrimonioCategoria      @relation(fields: [idCategoria], references: [idCategoria])
+  responsavel       Membro?                  @relation(fields: [idResponsavel], references: [idMembro])
+  depreciacoes      PatrimonioDepreciacao[]
+  movimentacoes     PatrimonioMovimentacao[]
+
+  @@map("patrimonio")
+}
+
+model PatrimonioMovimentacao {
+  idMovimentacao        String           @id @default(uuid()) @db.Uuid
+  idPatrimonio          String           @db.Uuid
+  tipoMovimentacao      TipoMovimentacao @map("tipo_movimentacao")
+  descricao             String
+  localAnterior         String?          @map("local_anterior") @db.VarChar(120)
+  novoLocal             String?          @map("novo_local") @db.VarChar(120)
+  idResponsavelAnterior String?          @map("id_responsavel_anterior") @db.Uuid
+  idResponsavelNovo     String?          @map("id_responsavel_novo") @db.Uuid
+  dataMovimentacao      DateTime         @map("data_movimentacao") @db.Date
+  registradoPor         String           @map("registrado_por") @db.Uuid
+  criadoEm              DateTime         @default(now()) @map("criado_em")
+  patrimonio            Patrimonio       @relation(fields: [idPatrimonio], references: [idPatrimonio])
+  responsavelAnterior   Membro?          @relation("MovimentacaoAnterior", fields: [idResponsavelAnterior], references: [idMembro])
+  responsavelNovo       Membro?          @relation("MovimentacaoNovo", fields: [idResponsavelNovo], references: [idMembro])
+  registrador           Usuario          @relation(fields: [registradoPor], references: [idUsuario])
+
+  @@map("patrimonio_movimentacoes")
+}
+
+model PatrimonioDepreciacao {
+  idDepreciacao   String            @id @default(uuid()) @db.Uuid
+  idPatrimonio    String            @db.Uuid
+  dataCalculo     DateTime          @map("data_calculo") @db.Date
+  valorDepreciado Decimal           @map("valor_depreciado") @db.Decimal(14, 2)
+  valorAtual      Decimal           @map("valor_atual") @db.Decimal(14, 2)
+  metodo          MetodoDepreciacao @default(Linear)
+  criadoEm        DateTime          @default(now()) @map("criado_em")
+  patrimonio      Patrimonio        @relation(fields: [idPatrimonio], references: [idPatrimonio])
+
+  @@map("patrimonio_depreciacao")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  token     String    @unique @db.VarChar(500)
+  userId    String    @map("user_id") @db.Uuid
+  expiresAt DateTime  @map("expires_at") @db.Timestamp(6)
+  revoked   Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at") @db.Timestamp(6)
+  user      Usuario   @relation(fields: [userId], references: [idUsuario], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Casamento {
+  idCasamento     String          @id @default(uuid()) @db.Uuid
+  nomeNoivo       String          @map("nome_noivo") @db.VarChar(150)
+  noivoMembro     Boolean         @default(true) @map("noivo_membro")
+  nomeNoiva       String          @map("nome_noiva") @db.VarChar(150)
+  noivaMembro     Boolean         @default(true) @map("noiva_membro")
+  data            DateTime        @db.Date
+  hora            String?         @db.VarChar(10)
+  local           String?         @db.VarChar(200)
+  celebrante      String?         @db.VarChar(150)
+  status          StatusCasamento @default(EM_PROCESSO)
+  testemunhas     String?
+  statusDocumento StatusDocumento @default(PENDENTE) @map("status_documento")
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+  atualizadoEm    DateTime        @updatedAt @map("atualizado_em")
+
+  @@map("casamentos")
+}
+
+model EscolaTurma {
+  idTurma      String           @id @default(uuid()) @db.Uuid
+  nome         String           @db.VarChar(100)
+  professor    String?          @db.VarChar(150)
+  faixaEtaria  String?          @map("faixa_etaria") @db.VarChar(50)
+  sala         String?          @db.VarChar(50)
+  estudantesIds Json?            @default("[]") @map("estudantes_ids")
+  ativo        Boolean          @default(true)
+  criadoEm     DateTime         @default(now()) @map("criado_em")
+  atualizadoEm DateTime         @updatedAt @map("atualizado_em")
+  presencas    EscolaPresenca[]
+
+  @@map("escola_turmas")
+}
+
+model EscolaPresenca {
+  idPresenca          String      @id @default(uuid()) @db.Uuid
+  idTurma             String      @map("id_turma") @db.Uuid
+  data                DateTime    @db.Date
+  estudantesPresentes Json        @map("estudantes_presentes")
+  turma               EscolaTurma @relation(fields: [idTurma], references: [idTurma])
+
+  @@map("escola_presencas")
+}
+
+model Livro {
+  idLivro              String            @id @default(uuid()) @db.Uuid
+  titulo               String            @db.VarChar(200)
+  autor                String            @db.VarChar(150)
+  categoria            String?           @db.VarChar(100)
+  quantidadeTotal      Int               @default(1) @map("quantidade_total")
+  quantidadeDisponivel Int               @default(1) @map("quantidade_disponivel")
+  criadoEm             DateTime          @default(now()) @map("criado_em")
+  atualizadoEm         DateTime          @updatedAt @map("atualizado_em")
+  emprestimos          LivroEmprestimo[]
+
+  @@map("livros")
+}
+
+model LivroEmprestimo {
+  idEmprestimo   String           @id @default(uuid()) @db.Uuid
+  idLivro        String           @map("id_livro") @db.Uuid
+  idMembro       String           @map("id_membro") @db.Uuid
+  dataEmprestimo DateTime         @default(now()) @map("data_emprestimo")
+  dataDevolucao  DateTime?        @map("data_devolucao")
+  status         StatusEmprestimo @default(ATIVO)
+  livro          Livro            @relation(fields: [idLivro], references: [idLivro])
+  membro         Membro           @relation(fields: [idMembro], references: [idMembro])
+
+  @@map("livro_emprestimos")
+}
+
+model IgrejaConfiguracao {
+  id           String  @id @default("default")
+  nomeIgreja   String  @map("nome_igreja") @db.VarChar(200)
+  cnpj         String? @db.VarChar(20)
+  denominacao  String? @db.VarChar(150)
+  telefone     String? @db.VarChar(50)
+  email        String? @db.VarChar(120)
+  enderecoJson Json?   @map("endereco_json")
+  redesSociais Json?   @map("redes_sociais")
+  logo         String?
+  missao       String?
+  visao        String?
+  valores      String?
+
+  @@map("igreja_configuracoes")
+}
+
+enum Perfil {
+  ADMIN
+  PASTOR
+  TESOUREIRO
+  SECRETARIO
+  MEMBRO
+}
+
+enum Genero {
+  M
+  F
+}
+
+enum MetodoPagamento {
+  DINHEIRO
+  TRANSFERENCIA
+  CARTAO
+}
+
+enum TipoOferta {
+  CULTO
+  EVENTO
+  MISSOES
+  OUTROS
+}
+
+enum EstadoConservacao {
+  Novo
+  Bom
+  Regular
+  Danificado
+  Inservivel
+}
+
+enum OrigemPatrimonio {
+  Compra
+  Doacao
+  Transferencia
+  Outro
+}
+
+enum TipoMovimentacao {
+  Transferencia
+  Baixa
+  Reparo
+  Auditoria
+  Outro
+}
+
+enum MetodoDepreciacao {
+  Linear
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILED
+  UNAUTHORIZED
+}
+
+enum StatusCasamento {
+  EM_PROCESSO
+  REALIZADO
+  CANCELADO
+}
+
+enum StatusDocumento {
+  PENDENTE
+  COMPLETO
+}
+
+enum StatusEmprestimo {
+  ATIVO
+  DEVOLVIDO
+  ATRASADO
+}
+
+model BeneficiarioSocial {
+  idBeneficiario String   @id @default(uuid()) @db.Uuid
+  nome           String   @db.VarChar(150)
+  telefone       String?  @db.VarChar(50)
+  necessidades   String
+  dataUltimaAjuda DateTime? @map("data_ultima_ajuda") @db.Date
+  status         StatusBeneficiario @default(ATIVO)
+  criadoEm       DateTime @default(now()) @map("criado_em")
+  atualizadoEm   DateTime @updatedAt @map("atualizado_em")
+
+  @@map("beneficiarios_sociais")
+}
+
+enum StatusBeneficiario {
+  ATIVO
+  INATIVO
+  URGENTE
+}
