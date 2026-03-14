@@ -7,7 +7,7 @@
     "dev": "vite",
     "server": "tsx --watch server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "build": "vite build",
+    "build": "prisma generate && vite build",
     "preview": "vite preview"
   },
   "prisma": {

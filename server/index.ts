@@ -66,6 +66,32 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Diagnostic Route
+app.get('/api/diag', async (req, res) => {
+    const diag: any = {
+        timestamp: new Date().toISOString(),
+        env: {
+            NODE_ENV: process.env.NODE_ENV,
+            DATABASE_URL_SET: !!process.env.DATABASE_URL,
+            JWT_SECRET_SET: !!process.env.JWT_SECRET,
+            TZ: process.env.TZ
+        },
+        db: 'PENDING'
+    };
+
+    try {
+        const prismaImport = await import('./db.ts');
+        const prismaClient = prismaImport.default;
+        await (prismaClient as any).$queryRaw`SELECT 1`;
+        diag.db = 'CONNECTED';
+    } catch (error: any) {
+        diag.db = 'FAILED';
+        diag.error = error.message;
+    }
+
+    res.json(diag);
+});
+
 // Test Proxy Route
 app.get('/api/test-proxy', (req, res) => {
     console.log('✅ Pedido de teste recebido no backend');
