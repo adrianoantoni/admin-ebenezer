@@ -1,22 +1,7 @@
-import './loadEnv';
+// import './loadEnv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import authRoutes from './routes/auth';
-import membersRoutes from './routes/members';
-import financeRoutes from './routes/finance';
-import inventoryRoutes from './routes/inventory';
-import eventRoutes from './routes/events';
-import departmentRoutes from './routes/departments';
-import marriageRoutes from './routes/marriages';
-import schoolRoutes from './routes/school';
-import libraryRoutes from './routes/library';
-import settingsRoutes from './routes/settings';
-import socialRoutes from './routes/social';
-import usersRoutes from './routes/users';
-import fiscalYearRoutes from './routes/fiscal-year';
-import auditRoutes from './routes/audit';
-import { authenticateToken } from './middleware/auth';
 import { errorHandler } from './middleware/error';
 
 const app = express();
@@ -40,27 +25,6 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/members', membersRoutes);
-app.use('/api/finance', financeRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/departments', departmentRoutes);
-app.use('/api/marriages', marriageRoutes);
-app.use('/api/school', schoolRoutes);
-app.use('/api/library', libraryRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/social', socialRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/fiscal-years', fiscalYearRoutes);
-app.use('/api/audit', auditRoutes);
-
-// Protected Sample Route
-app.get('/api/auth/me', authenticateToken, (req, res) => {
-    res.json({ message: 'Acesso concedido', user: (req as any).user });
-});
-
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -70,6 +34,7 @@ app.get('/health', (req, res) => {
 app.get('/api/diag', async (req, res) => {
     const diag: any = {
         timestamp: new Date().toISOString(),
+        info: 'Testing middleware without loadEnv',
         env: {
             NODE_ENV: process.env.NODE_ENV,
             DATABASE_URL_SET: !!process.env.DATABASE_URL,
