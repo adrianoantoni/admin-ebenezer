@@ -154,7 +154,11 @@ router.post('/forgot-password', async (req: Request, res: Response, next: NextFu
             },
         });
 
-        await sendResetPasswordEmail(user.email, token);
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const origin = req.get('origin') || `${protocol}://${host}`;
+        
+        await sendResetPasswordEmail(user.email, token, origin);
 
         res.json({ message: 'Instruções de recuperação enviadas para o seu e-mail.' });
     } catch (error) {

@@ -31,4 +31,103 @@ router.get('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request,
     }
 });
 
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { sendResetPasswordEmail } from '../utils/email.service.js';
+
+// ... (LISTAR USUÁRIOS remains as is)
+
+// CRIAR USUÁRIO
+router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
+    const { nome, email, senha, perfil } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(senha, 10);
+        const newUser = await (prisma as any).usuario.create({
+            data: {
+                nome,
+                email: email.toLowerCase(),
+                senha: hashedPassword,
+                perfil: perfil || 'MEMBRO',
+                photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=random`
+            }
+        });
+
+        res.status(201).json({
+            id: newUser.idUsuario,
+            name: newUser.nome,
+            email: newUser.email,
+            role: newUser.perfil === 'ADMIN' ? 'SUPER_ADMIN' : newUser.perfil,
+            lastLogin: new Date().toISOString()
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ATUALIZAR USUÁRIO
+router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { nome, email, perfil } = req.body;
+    try {
+        const updated = await (prisma as any).usuario.update({
+            where: { idUsuario: id },
+            data: {
+                nome,
+                email: email.toLowerCase(),
+                perfil
+            }
+        });
+
+        res.json({
+            id: updated.idUsuario,
+            name: updated.nome,
+            email: updated.email,
+            role: updated.perfil === 'ADMIN' ? 'SUPER_ADMIN' : updated.perfil,
+            lastLogin: updated.ultimoLogin || new Date().toISOString()
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// EXCLUIR USUÁRIO
+router.delete('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    try {
+        await (prisma as any).usuario.delete({
+            where: { idUsuario: id }
+        });
+        res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+// DISPARAR RECUPERAÇÃO MANUAL
+router.post('/:id/reset-password', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    try {
+        const user = await (prisma as any).usuario.findUnique({ where: { idUsuario: id } });
+        if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+        const token = uuidv4();
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours() + 1);
+
+        await (prisma as any).usuario.update({
+            where: { idUsuario: id },
+            data: { resetToken: token, resetTokenExpiry: expiry }
+        });
+
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const origin = req.get('origin') || `${protocol}://${host}`;
+
+        await sendResetPasswordEmail(user.email, token, origin);
+        res.json({ message: 'E-mail de redefinição enviado com sucesso.' });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default router;

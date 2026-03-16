@@ -64,19 +64,8 @@ const UsersPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDeleteUser = (id: string, name: string) => {
-    if (id === state.auth.user?.id) {
-      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Você não pode excluir seu próprio acesso!', type: 'error' } });
-      return;
-    }
 
-    if (confirm(`Tem certeza que deseja revogar o acesso de ${name}?`)) {
-      // Implementação simplificada de exclusão (idealmente via context action)
-      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: `Acesso de ${name} revogado.`, type: 'info' } });
-    }
-  };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.email) {
       dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Nome e Email são obrigatórios!', type: 'error' } });
       return;
@@ -87,25 +76,93 @@ const UsersPage: React.FC = () => {
       return;
     }
 
-    const userData: User = {
-      id: editingId || `u${Date.now()}`,
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      lastLogin: editingId ? (state.users.find(u => u.id === editingId)?.lastLogin || new Date().toISOString()) : new Date().toISOString()
-    };
+    try {
+      const url = editingId ? `/api/users/${editingId}` : '/api/users';
+      const method = editingId ? 'PUT' : 'POST';
+      const token = localStorage.getItem('token');
 
-    if (editingId) {
-      dispatch({ type: 'UPDATE_USER', payload: userData });
-      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Perfil de operador atualizado!', type: 'success' } });
-    } else {
-      dispatch({ type: 'ADD_USER', payload: userData });
-      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Novo operador registrado com sucesso!', type: 'success' } });
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nome: formData.name,
+          email: formData.email,
+          perfil: formData.role === 'SUPER_ADMIN' ? 'ADMIN' :
+                  formData.role === 'TREASURER' ? 'TESOUREIRO' :
+                  formData.role === 'SECRETARY' ? 'SECRETARIO' :
+                  formData.role === 'USER' ? 'MEMBRO' : formData.role,
+          senha: formData.password
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao salvar usuário');
+      }
+
+      const savedUser = await response.json();
+      
+      if (editingId) {
+        dispatch({ type: 'UPDATE_USER', payload: savedUser });
+        dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Perfil de operador atualizado!', type: 'success' } });
+      } else {
+        dispatch({ type: 'ADD_USER', payload: savedUser });
+        dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Novo operador registrado com sucesso!', type: 'success' } });
+      }
+
+      setShowModal(false);
+      setEditingId(null);
+      setFormData({ name: '', email: '', role: UserRole.USER, password: '', confirmPassword: '' });
+    } catch (error: any) {
+      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: error.message || 'Erro ao conectar com o servidor', type: 'error' } });
+    }
+  };
+
+  const handleResetPassword = async (user: User) => {
+    if (!confirm(`Deseja enviar um e-mail de redefinição de senha para ${user.name}?`)) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${user.id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) throw new Error('Falha ao disparar recuperação');
+
+      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: `E-mail de recuperação enviado para ${user.email}`, type: 'success' } });
+    } catch (error: any) {
+      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: error.message, type: 'error' } });
+    }
+  };
+
+  const handleDeleteUser = async (id: string, name: string) => {
+    if (id === state.auth.user?.id) {
+      dispatch({ type: 'ADD_NOTIFICATION', payload: { message: 'Você não pode excluir seu próprio acesso!', type: 'error' } });
+      return;
     }
 
-    setShowModal(false);
-    setEditingId(null);
-    setFormData({ name: '', email: '', role: UserRole.USER, password: '', confirmPassword: '' });
+    if (confirm(`Tem certeza que deseja revogar o acesso de ${name}?`)) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/users/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Erro ao revogar acesso');
+
+        dispatch({ type: 'ADD_NOTIFICATION', payload: { message: `Acesso de ${name} revogado.`, type: 'info' } });
+        // Rematricular ou filtrar localmente
+        const currentUsers = state.users.filter(u => u.id !== id);
+        dispatch({ type: 'SYNC_STORAGE', payload: { users: currentUsers } });
+      } catch (error: any) {
+        dispatch({ type: 'ADD_NOTIFICATION', payload: { message: error.message, type: 'error' } });
+      }
+    }
   };
 
   return (
@@ -182,14 +239,23 @@ const UsersPage: React.FC = () => {
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end gap-2">
                         <button
+                          onClick={() => handleResetPassword(user)}
+                          className="p-3 bg-gray-50 text-gray-400 hover:text-amber-600 hover:bg-white rounded-xl transition-all shadow-sm"
+                          title="Enviar link de redefinição"
+                        >
+                          <Key size={16} />
+                        </button>
+                        <button
                           onClick={() => handleOpenEdit(user)}
                           className="p-3 bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all shadow-sm"
+                          title="Configurações"
                         >
                           <Settings size={16} />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user.id, user.name)}
                           className="p-3 bg-gray-50 text-gray-300 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm"
+                          title="Revogar Acesso"
                         >
                           <Trash2 size={16} />
                         </button>

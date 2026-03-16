@@ -9,8 +9,9 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export const sendResetPasswordEmail = async (email: string, token: string) => {
-    const resetUrl = `${process.env.APP_URL}/#/reset-password/${token}`;
+export const sendResetPasswordEmail = async (email: string, token: string, origin?: string) => {
+    const baseUrl = origin || process.env.APP_URL || 'http://localhost:3000';
+    const resetUrl = `${baseUrl}/reset-password/${token}`;
 
     const mailOptions = {
         from: `"Equipe Igreja Baptista da Sapú" <${process.env.SMTP_FROM || 'noreply@baptistasapu.com'}>`,
