@@ -49,6 +49,7 @@ router.get('/active', authenticateToken, async (req: Request, res: Response, nex
 // CRIAR NOVO ANO FISCAL
 router.post('/', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log('🔵 POST /api/fiscal-years - Payload:', req.body);
         const { ano, descricao, ativar } = req.body;
 
         if (!ano) {

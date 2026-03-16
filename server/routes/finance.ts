@@ -213,6 +213,8 @@ router.get('/offerings', authenticateToken, async (req: Request, res: Response, 
 router.post('/offerings', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
     const data = req.body;
     try {
+        console.log('🔵 POST /api/finance/offerings - Payload:', data);
+
         // Validar usuário
         let userId = (req as any).user?.userId;
         if (userId) {
@@ -222,12 +224,28 @@ router.post('/offerings', authenticateToken, async (req: Request, res: Response,
             }
         }
 
+        // Mapeamento de Tipo de Oferta (Enum Prisma: CULTO, EVENTO, MISSOES, OUTROS)
+        const rawType = (data.category || data.type || 'Geral').toUpperCase();
+        let tipoFinal: 'CULTO' | 'EVENTO' | 'MISSOES' | 'OUTROS' = 'CULTO';
+
+        if (rawType.includes('MISS')) {
+            tipoFinal = 'MISSOES';
+        } else if (rawType.includes('EVEN')) {
+            tipoFinal = 'EVENTO';
+        } else if (rawType.includes('OUTR')) {
+            tipoFinal = 'OUTROS';
+        } else {
+            tipoFinal = 'CULTO';
+        }
+
+        console.log(`🟡 Mapeamento de Oferta: ${rawType} -> ${tipoFinal}`);
+
         const newOffering = await (prisma as any).oferta.create({
             data: {
-                tipo: data.type || 'Geral',
+                tipo: tipoFinal,
                 valor: data.amount,
                 data: data.date ? new Date(data.date) : new Date(),
-                observacao: data.description,
+                observacao: data.description || data.category,
                 idMembro: data.memberId || null,
                 idUsuario: userId
             }
