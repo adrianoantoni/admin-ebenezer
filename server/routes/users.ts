@@ -67,15 +67,24 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request
 // ATUALIZAR USUÁRIO
 router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { nome, email, perfil } = req.body;
+    const { nome, email, perfil, senha } = req.body;
     try {
+        const updateData: any = {
+            nome,
+            email: email.toLowerCase(),
+            perfil
+        };
+
+        if (senha && senha.trim() !== '') {
+            console.log(`🔑 Atualizando senha para o usuário: ${id}`);
+            updateData.senha = await bcrypt.hash(senha, 10);
+        } else {
+            console.log(`ℹ️ Nenhuma nova senha fornecida para o usuário: ${id}`);
+        }
+
         const updated = await (prisma as any).usuario.update({
             where: { idUsuario: id },
-            data: {
-                nome,
-                email: email.toLowerCase(),
-                perfil
-            }
+            data: updateData
         });
 
         res.json({

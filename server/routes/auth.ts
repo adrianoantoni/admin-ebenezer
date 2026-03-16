@@ -192,6 +192,7 @@ router.post('/reset-password', async (req: Request, res: Response, next: NextFun
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        console.log(`🔑 Atualizando senha para o usuário ID: ${user.idUsuario}`);
 
         await (prisma as any).usuario.update({
             where: { idUsuario: user.idUsuario },
