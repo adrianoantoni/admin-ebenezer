@@ -55,7 +55,16 @@ router.post('/', authenticateToken, async (req: Request, res: Response, next: Ne
         });
 
         const newAsset = await (prisma as any).patrimonio.create({
-            // ... (keep data block)
+            data: {
+                nome: data.name,
+                dataAquisicao: data.purchaseDate ? new Date(data.purchaseDate) : new Date(),
+                valorAquisicao: data.purchaseValue,
+                estadoConservacao: data.status === 'GOOD' ? 'Bom' :
+                    data.status === 'NEED_REPAIR' ? 'Regular' : 'Danificado',
+                codigoInventario: data.code,
+                idCategoria: category.idCategoria,
+                idResponsavel: data.responsibleId || null
+            }
         });
 
         // Registrar log de auditoria

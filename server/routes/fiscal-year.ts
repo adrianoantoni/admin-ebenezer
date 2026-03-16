@@ -1,9 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // LISTAR TODOS OS ANOS FISCAIS
 router.get('/', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {

@@ -170,7 +170,14 @@ router.post('/classes', authenticateToken, async (req: Request, res: Response, n
     const data = req.body;
     try {
         const newClass = await (prisma as any).escolaTurma.create({
-            // ... (keep data)
+            data: {
+                nome: data.name,
+                professor: data.teacherName,
+                faixaEtaria: data.ageGroup,
+                sala: data.room,
+                ativo: data.status === 'ACTIVE',
+                estudantesIds: data.studentIds || []
+            }
         });
 
         // Registrar log de auditoria

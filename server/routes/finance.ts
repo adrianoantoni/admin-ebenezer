@@ -223,7 +223,14 @@ router.post('/offerings', authenticateToken, async (req: Request, res: Response,
         }
 
         const newOffering = await (prisma as any).oferta.create({
-            // ... (keep data block)
+            data: {
+                tipo: data.type || 'Geral',
+                valor: data.amount,
+                data: data.date ? new Date(data.date) : new Date(),
+                observacao: data.description,
+                idMembro: data.memberId || null,
+                idUsuario: userId
+            }
         });
 
         // Registrar log de auditoria
@@ -306,7 +313,16 @@ router.post('/expenses', authenticateToken, async (req: Request, res: Response, 
         }
 
         const newExpense = await (prisma as any).saida.create({
-            // ... (keep data block)
+            data: {
+                valor: data.amount,
+                categoria: data.category,
+                data: data.date ? new Date(data.date) : new Date(),
+                metodoPagamento: data.method === 'CASH' ? 'DINHEIRO' :
+                    data.method === 'TRANSFER' ? 'TRANSFERENCIA' : 'CARTAO',
+                observacao: data.description,
+                idUsuario: userId,
+                idAnoFiscal: activeFiscalYear?.idAno
+            }
         });
 
         // Registrar log de auditoria
