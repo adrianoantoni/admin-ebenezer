@@ -88,7 +88,7 @@ const Finance: React.FC = () => {
       const initFiscalYear = async () => {
         try {
           const token = localStorage.getItem('token');
-          await fetch('/api/fiscal-year/active', {
+          await fetch('/api/fiscal-years/active', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
         } catch (e) {

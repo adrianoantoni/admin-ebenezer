@@ -73,7 +73,7 @@ app.get('/api/diag', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/members', membersRoutes);
 app.use('/api/finance', financeRoutes);
-app.use('/api/fiscal-year', fiscalYearRoutes);
+app.use('/api/fiscal-years', fiscalYearRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/inventory', inventoryRoutes);
