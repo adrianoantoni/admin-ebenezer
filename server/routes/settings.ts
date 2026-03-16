@@ -28,7 +28,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response, next: Nex
             settings = await (prisma as any).igrejaConfiguracao.create({
                 data: {
                     id: 'default',
-                    nomeIgreja: 'Igreja EclesiaMaster',
+                    nomeIgreja: 'Igreja Baptista da Sapú',
                 }
             });
         }

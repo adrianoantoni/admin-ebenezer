@@ -296,7 +296,7 @@ const Reports: React.FC = () => {
     try {
       const ai = new GoogleGenAI({ apiKey: (process.env.API_KEY || process.env.GEMINI_API_KEY) as string });
       const prompt = `
-        Aja como um Consultor Analítico Sênior para a Igreja EclesiaMaster. 
+        Aja como um Consultor Analítico Sênior para a Igreja Baptista da Sapú. 
         Com base nos dados consolidados do ano ${selectedYear}, gere um RELATÓRIO EXECUTIVO DE GESTÃO ESTRATÉGICA para ser apresentado na reunião dos representantes da empresa.
 
         PONTOS DE DADOS CHAVE:
@@ -382,7 +382,7 @@ const Reports: React.FC = () => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.setProperties({
         title: `Relatório de Saídas - ${selectedYear}`,
-        author: 'EclesiaMaster System'
+        author: 'Igreja Baptista da Sapú System'
       });
       pdf.setFontSize(18);
       pdf.text(`Relatório de Saídas - ${selectedYear}`, 20, 20);
@@ -505,7 +505,7 @@ const Reports: React.FC = () => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.setProperties({
         title: `Pendências de Dízimos - ${selectedYear}`,
-        author: 'EclesiaMaster System'
+        author: 'Igreja Baptista da Sapú System'
       });
       pdf.setFontSize(20);
       pdf.setFont('helvetica', 'bold');
@@ -656,7 +656,7 @@ const Reports: React.FC = () => {
               <Church size={60} className="text-blue-900" />
             )}
             <div>
-              <h1 className="text-3xl font-black text-blue-900 uppercase tracking-tight">{state.churchSettings?.nomeIgreja || 'Igreja EclesiaMaster'}</h1>
+              <h1 className="text-3xl font-black text-blue-900 uppercase tracking-tight">{state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'}</h1>
               <p className="text-sm font-bold text-gray-500 italic mt-1">{state.churchSettings?.denominacao || 'Ministério de Evangelização'}</p>
               <div className="flex gap-4 mt-3">
                 <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-black uppercase tracking-widest">Relatório {activeTab.toUpperCase()}</div>
@@ -991,7 +991,7 @@ const Reports: React.FC = () => {
               <Church size={80} className="text-blue-900" />
             )}
             <div>
-              <h1 className="text-4xl font-black text-blue-900 uppercase tracking-tight">{state.churchSettings?.nomeIgreja || 'Igreja EclesiaMaster'}</h1>
+              <h1 className="text-4xl font-black text-blue-900 uppercase tracking-tight">{state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'}</h1>
               <p className="text-lg font-bold text-gray-500 italic mt-1">{state.churchSettings?.denominacao || 'Ministério de Evangelização'}</p>
               <div className="mt-4 px-4 py-2 bg-blue-900 text-white rounded-xl text-xs font-black uppercase tracking-widest inline-block">
                 RELATÓRIO CONSOLIDADO DE GESTÃO - {selectedYear}
@@ -1190,7 +1190,7 @@ const Reports: React.FC = () => {
 
         {/* Footer for formal validation */}
         <div className="mt-20 pt-10 border-t-2 border-gray-200 flex justify-between italic text-gray-400 text-xs">
-          <p>Documento gerado eletronicamente pelo sistema EclesiaMaster.</p>
+          <p>Documento gerado eletronicamente pelo sistema Igreja Baptista da Sapú.</p>
           <p>Assinatura do Tesoureiro/Responsável: __________________________________________</p>
         </div>
       </div>,

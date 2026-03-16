@@ -24,12 +24,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     <>
       {/* Mobile Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-blue-950/40 backdrop-blur-sm z-[100] transition-opacity md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsOpen(false)}
       />
 
       <aside
-        className={`fixed top-0 left-0 h-full bg-[#1e3a8a] text-white z-50 sidebar-transition flex flex-col shadow-2xl
+        className={`fixed top-0 left-0 h-full bg-[#1e3a8a] text-white z-[110] sidebar-transition flex flex-col shadow-2xl
           ${isOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'}
         `}
       >
@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             <div className="bg-amber-500 p-1.5 rounded-lg shrink-0">
               <Church size={isOpen ? 24 : 20} className="text-white" />
             </div>
-            {isOpen && <span className="font-poppins font-bold text-lg whitespace-nowrap">EclesiaMaster</span>}
+            {isOpen && <span className="font-poppins font-bold text-base whitespace-nowrap">Igreja Baptista da Sapú</span>}
           </div>
           <button
             onClick={() => setIsOpen(!isOpen)}

@@ -27,20 +27,25 @@ import { useApp } from './context/AppContext.tsx';
 
 const PrivateRoute = ({ children }: { children?: React.ReactNode }) => {
   const { state } = useApp();
-  if (state.auth.loading) return <div className="h-screen w-screen flex items-center justify-center bg-blue-50 text-blue-900 font-bold">Iniciando EclesiaMaster...</div>;
+  if (state.auth.loading) return <div className="h-screen w-screen flex items-center justify-center bg-blue-50 text-blue-900 font-bold italic">Iniciando Igreja Baptista da Sapú...</div>;
   return state.auth.isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
 const MainLayout = ({ children }: { children?: React.ReactNode }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-hidden">
+    <div className="flex min-h-screen bg-gray-50 overflow-hidden w-full max-w-full relative touch-none md:touch-auto">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-      <div className={`flex-1 flex flex-col min-w-0 ${sidebarOpen ? 'md:ml-64' : 'ml-0 md:ml-20'} transition-all duration-300`}>
+      <div 
+        className={`flex-1 flex flex-col min-w-0 w-full ${sidebarOpen ? 'md:ml-64' : 'ml-0 md:ml-20'} transition-all duration-300 relative z-0`}
+        style={{ touchAction: 'auto' }}
+      >
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
-          {children}
+          <div className="max-w-[100vw] overflow-x-hidden">
+            {children}
+          </div>
         </main>
       </div>
       <ToastContainer />

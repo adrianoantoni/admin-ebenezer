@@ -7,7 +7,7 @@ interface SEOProps {
 
 const SEO: React.FC<SEOProps> = ({ title, description }) => {
     useEffect(() => {
-        const fullTitle = `${title} | EclesiaMaster`;
+        const fullTitle = `${title} | Igreja Baptista da Sapú`;
         document.title = fullTitle;
 
         if (description) {

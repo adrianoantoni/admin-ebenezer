@@ -79,6 +79,8 @@ model Membro {
   movimentacoesNovas      PatrimonioMovimentacao[] @relation("MovimentacaoNovo")
   presencas               PresencaEvento[]
 
+  @@index([ativo])
+  @@index([idUsuario])
   @@map("membros")
 }
 
@@ -112,6 +114,10 @@ model Dizimo {
   idAnoFiscal     String?         @map("id_ano_fiscal") @db.Uuid
   anoFiscal       AnoFiscal?      @relation(fields: [idAnoFiscal], references: [idAno])
 
+  @@index([idMembro])
+  @@index([dataReferencia])
+  @@index([status])
+  @@index([data])
   @@map("dizimos")
 }
 
@@ -128,6 +134,8 @@ model Oferta {
   idUsuario    String?    @map("id_usuario") @db.Uuid
   usuario      Usuario?   @relation(fields: [idUsuario], references: [idUsuario])
 
+  @@index([data])
+  @@index([idMembro])
   @@map("ofertas")
 }
 
@@ -145,6 +153,8 @@ model Saida {
   idAnoFiscal     String?         @map("id_ano_fiscal") @db.Uuid
   anoFiscal       AnoFiscal?      @relation(fields: [idAnoFiscal], references: [idAno])
 
+  @@index([data])
+  @@index([categoria])
   @@map("saidas")
 }
 

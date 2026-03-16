@@ -63,7 +63,7 @@ const ResetPassword: React.FC = () => {
                         <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                             <Church size={32} />
                         </div>
-                        <h1 className="text-2xl font-black text-gray-800 tracking-tight">EclesiaMaster</h1>
+                        <h1 className="text-2xl font-black text-gray-800 tracking-tight">Igreja Baptista da Sapú</h1>
                         <p className="text-gray-400 font-medium text-sm mt-1">Defina sua nova senha de acesso</p>
                     </div>
 

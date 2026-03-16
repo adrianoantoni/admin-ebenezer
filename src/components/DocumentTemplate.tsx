@@ -11,7 +11,7 @@ interface DocumentTemplateProps {
 }
 
 export const DocumentTemplate: React.FC<DocumentTemplateProps> = ({ member, type, id, churchSettings, transactions = [] }) => {
-    const churchName = churchSettings?.nomeIgreja || 'Igreja EclesiaMaster';
+    const churchName = churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú';
     const logo = churchSettings?.logo;
     const denomination = churchSettings?.denominacao || '';
 

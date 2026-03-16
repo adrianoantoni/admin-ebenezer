@@ -11,7 +11,17 @@ const router = Router();
 router.get('/tithes', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log('🔵 GET /api/finance/tithes - Iniciando busca...');
+        const { year } = req.query;
+        const where: any = {};
+        if (year) {
+            where.dataReferencia = {
+                gte: new Date(Date.UTC(Number(year), 0, 1)),
+                lte: new Date(Date.UTC(Number(year), 11, 31))
+            };
+        }
+
         const tithes = await (prisma as any).dizimo.findMany({
+            where,
             include: { membro: true },
             orderBy: { data: 'desc' }
         });
@@ -182,7 +192,17 @@ router.post('/tithes', authenticateToken, async (req: Request, res: Response, ne
 router.get('/offerings', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log('🔵 GET /api/finance/offerings - Iniciando busca...');
+        const { year } = req.query;
+        const where: any = {};
+        if (year) {
+            where.data = {
+                gte: new Date(Date.UTC(Number(year), 0, 1)),
+                lte: new Date(Date.UTC(Number(year), 11, 31))
+            };
+        }
+
         const offerings = await (prisma as any).oferta.findMany({
+            where,
             include: { membro: true },
             orderBy: { data: 'desc' }
         });
@@ -276,7 +296,17 @@ router.post('/offerings', authenticateToken, async (req: Request, res: Response,
 router.get('/expenses', authenticateToken, async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log('🔵 GET /api/finance/expenses - Iniciando busca...');
+        const { year } = req.query;
+        const where: any = {};
+        if (year) {
+            where.data = {
+                gte: new Date(Date.UTC(Number(year), 0, 1)),
+                lte: new Date(Date.UTC(Number(year), 11, 31))
+            };
+        }
+
         const expenses = await (prisma as any).saida.findMany({
+            where,
             include: { usuario: true },
             orderBy: { data: 'desc' }
         });
@@ -556,87 +586,56 @@ router.get('/stats/debt', authenticateToken, async (req: Request, res: Response,
     try {
         console.log('🔵 GET /api/finance/stats/debt - Calculando dívida...');
 
-        // 1. Buscar todos os membros ativos que possuem um valor de dízimo esperado > 0
-        const allMembers = await (prisma as any).membro.findMany({
+        const today = new Date();
+        const currentYearStart = new Date(Date.UTC(today.getUTCFullYear(), 0, 1, 0, 0, 0));
+        const currentYearEnd = new Date(Date.UTC(today.getUTCFullYear(), 11, 31, 23, 59, 59));
+
+        // 1. Buscar apenas membros elegíveis e apenas os dízimos pagos DESTE ANO
+        const members = await (prisma as any).membro.findMany({
             where: {
                 ativo: true,
                 valorDizimoEsperado: { gt: 0 }
             },
-            include: { dizimos: true }
+            select: {
+                idMembro: true,
+                nomeCompleto: true,
+                valorDizimoEsperado: true,
+                dataConversao: true,
+                criadoEm: true,
+                dizimos: {
+                    where: {
+                        status: 'PAGO',
+                        dataReferencia: {
+                            gte: currentYearStart,
+                            lte: currentYearEnd
+                        }
+                    },
+                    select: {
+                        dataReferencia: true
+                    }
+                }
+            }
         });
-
-        const members = allMembers;
-
-        console.log(`DEBUG: Found ${members.length} eligible members for debt calc.`);
-        if (members.length > 0) {
-            console.log('DEBUG: Sample member:', JSON.stringify(members[0], null, 2));
-            members.forEach((m: any) => {
-                console.log(`Member: ${m.nomeCompleto}, Status: ${m.situacaoProfissional}, Expected: ${m.valorDizimoEsperado}, Created: ${m.criadoEm}, Converted: ${m.dataConversao}`);
-            });
-        }
 
         let totalDebt = 0;
         let totalDebtors = 0;
 
-        const today = new Date();
-        const yearEnd = new Date(Date.UTC(today.getUTCFullYear(), 11, 1, 12, 0, 0)); // December 1st
-        const currentYearEnd = yearEnd;
-        const memberDebug: any[] = [];
-
         for (const member of members) {
             const expected = Number(member.valorDizimoEsperado) || 0;
-            if (expected <= 0) {
-                memberDebug.push({ name: member.nomeCompleto, status: 'SKIPPED_NO_EXPECTED' });
-                continue;
-            }
+            
+            // Determinar quantos meses o membro deveria ter pago este ano
+            // (Assumindo compromisso desde o início do ano ou desde a entrada)
+            const entranceDate = member.dataConversao ? new Date(member.dataConversao) : new Date(member.criadoEm);
+            const effectiveStart = entranceDate > currentYearStart ? 
+                new Date(Date.UTC(entranceDate.getUTCFullYear(), entranceDate.getUTCMonth(), 1)) : 
+                currentYearStart;
 
-            let startDateRaw = member.dataConversao ? new Date(member.dataConversao) : new Date(member.criadoEm);
-            let startDate = new Date(Date.UTC(startDateRaw.getUTCFullYear(), startDateRaw.getUTCMonth(), 1, 12, 0, 0));
-
-            // REGRA: O compromisso anual começa no início do ano atual para o cálculo da dívida global
-            // exceto se a data de conversão/criação for de anos anteriores, onde usamos o início deste ano.
-            const currentYearStart = new Date(Date.UTC(today.getUTCFullYear(), 0, 1, 0, 0, 0));
-            const calculationStartDate = currentYearStart;
-
-            if (calculationStartDate > currentYearEnd) {
-                memberDebug.push({
-                    name: member.nomeCompleto,
-                    status: 'FUTURE_START',
-                    start: calculationStartDate.toISOString(),
-                    current: currentYearEnd.toISOString()
-                });
-                continue;
-            }
-
-            // Contar meses devidos até o fim do ano
-            let monthsDiff = (currentYearEnd.getUTCFullYear() - calculationStartDate.getUTCFullYear()) * 12 + (currentYearEnd.getUTCMonth() - calculationStartDate.getUTCMonth()) + 1;
-
-            const paidMonths = new Set();
-            member.dizimos.forEach((d: any) => {
-                // APENAS consideramos como "PAGO" se o status for de fato LIQUIDADO ou nulo (histórico)
-                if (d.status !== 'PAGO' && d.status !== null) return;
-
-                const dDate = new Date(d.dataReferencia);
-                const dDateNorm = new Date(Date.UTC(dDate.getUTCFullYear(), dDate.getUTCMonth(), 1, 0, 0, 0));
-
-                if (dDateNorm.getTime() <= currentYearEnd.getTime() && dDateNorm.getTime() >= calculationStartDate.getTime()) {
-                    const key = `${dDateNorm.getUTCFullYear()}-${dDateNorm.getUTCMonth()}`;
-                    paidMonths.add(key);
-                }
-            });
-
-            const unpaidCount = Math.max(0, monthsDiff - paidMonths.size);
-
-            memberDebug.push({
-                name: member.nomeCompleto,
-                expected,
-                start: startDate.toISOString(),
-                dataConversao: member.dataConversao,
-                criadoEm: member.criadoEm,
-                monthsDiff,
-                paid: paidMonths.size,
-                unpaid: unpaidCount
-            });
+            // Meses até hoje
+            const monthsToDate = (today.getUTCFullYear() - effectiveStart.getUTCFullYear()) * 12 + (today.getUTCMonth() - effectiveStart.getUTCMonth()) + 1;
+            
+            // Meses efetivamente pagos (contagem simples pois filtramos no banco por este ano)
+            const paidCount = member.dizimos.length;
+            const unpaidCount = Math.max(0, monthsToDate - paidCount);
 
             if (unpaidCount > 0) {
                 totalDebt += unpaidCount * expected;

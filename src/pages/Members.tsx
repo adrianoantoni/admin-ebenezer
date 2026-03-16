@@ -162,7 +162,7 @@ const Members: React.FC = () => {
     const churchLogo = state.churchSettings?.logo;
 
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
-    const churchName = state.churchSettings?.nomeIgreja || 'Igreja EclesiaMaster';
+    const churchName = state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú';
 
     const membersToPrint = status === 'ALL'
       ? state.members

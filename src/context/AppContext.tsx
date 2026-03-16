@@ -58,14 +58,14 @@ interface ExtendedAppState extends AppState {
 }
 
 const defaultChurchSettings: ChurchSettings = {
-  nomeIgreja: 'Igreja EclesiaMaster',
-  sigla: 'IEM',
+  nomeIgreja: 'Igreja Baptista da Sapú',
+  sigla: 'IBS',
   cnpj: '00.000.000/0001-00',
   dataFundacao: '2010-01-01',
-  denominacao: 'Cristã Evangélica',
+  denominacao: 'Convenção Baptista de Angola',
   telefone: '(11) 99999-9999',
-  email: 'contato@eclesiamaster.com',
-  website: 'www.eclesiamaster.com',
+  email: 'contato@baptistasapu.com',
+  website: 'www.baptistasapu.com',
   endereco: {
     logradouro: 'Rua das Oliveiras',
     numero: '100',
@@ -75,8 +75,8 @@ const defaultChurchSettings: ChurchSettings = {
     cep: '00000-000'
   },
   redesSociais: {
-    facebook: 'facebook.com/eclesiamaster',
-    instagram: 'instagram.com/eclesiamaster'
+    facebook: 'facebook.com/baptistasapu',
+    instagram: 'instagram.com/baptistasapu'
   },
   cores: {
     primaria: '#1e40af',
@@ -285,14 +285,15 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
           }
         };
 
+        const currentYear = new Date().getFullYear();
         const [
           members, tithes, offerings, expenses, inventory, events,
           marriages, departments, schoolClasses, libraryBooks, settings, users, auditLogs, social
         ] = await Promise.all([
           safeFetch('/api/members'),
-          safeFetch('/api/finance/tithes'),
-          safeFetch('/api/finance/offerings'),
-          safeFetch('/api/finance/expenses'),
+          safeFetch(`/api/finance/tithes?year=${currentYear}`),
+          safeFetch(`/api/finance/offerings?year=${currentYear}`),
+          safeFetch(`/api/finance/expenses?year=${currentYear}`),
           safeFetch('/api/inventory'),
           safeFetch('/api/events'),
           safeFetch('/api/marriages'),

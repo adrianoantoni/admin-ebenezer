@@ -120,10 +120,14 @@ const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="sticky top-0 bg-white/80 backdrop-blur-md h-16 border-b border-gray-200 px-4 md:px-8 flex items-center justify-between z-30">
+    <header className="sticky top-0 bg-white/90 backdrop-blur-lg h-16 border-b border-gray-200 px-4 md:px-8 flex items-center justify-between z-50 pt-[env(safe-area-inset-top)]">
       <div className="flex items-center gap-4">
-        <button onClick={onMenuClick} className="p-2 hover:bg-gray-100 rounded-lg md:hidden">
-          <Menu size={20} />
+        <button 
+          onClick={onMenuClick} 
+          className="p-2.5 bg-gray-50 hover:bg-gray-100 text-gray-800 rounded-xl md:hidden border border-gray-100 shadow-sm active:scale-95 transition-all"
+          aria-label="Toggle Menu"
+        >
+          <Menu size={22} strokeWidth={2.5} />
         </button>
         <div className="relative hidden sm:block">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
