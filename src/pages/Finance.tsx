@@ -58,7 +58,7 @@ const Finance: React.FC = () => {
     try {
       console.log('🔵 Frontend: Buscando anos fiscais...');
       const res = await fetch('/api/fiscal-years', {
-        headers: { 'Authorization': `Bearer ${token} ` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -83,6 +83,19 @@ const Finance: React.FC = () => {
   React.useEffect(() => {
     if (state.auth.isAuthenticated) {
       fetchFiscalYears();
+      
+      // Auto-inicializar/verificar ano ativo
+      const initFiscalYear = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await fetch('/api/fiscal-year/active', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (e) {
+          console.error('Erro na auto-inicialização:', e);
+        }
+      };
+      initFiscalYear();
     }
   }, [state.auth.isAuthenticated]);
 
@@ -91,7 +104,7 @@ const Finance: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/finance/stats/debt', {
-          headers: { 'Authorization': `Bearer ${token} ` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();
@@ -435,14 +448,15 @@ const Finance: React.FC = () => {
                   </option>
                 ))
               ) : (
-                <option value={selectedYear}>{selectedYear} (Carregando...)</option>
+                <option value={selectedYear}>{selectedYear} (Nenhum cadastrado)</option>
               )}
             </select>
           </div>
 
           <button
             onClick={async () => {
-              const lastYear = fiscalYears.length > 0 ? Math.max(...fiscalYears.map(f => f.ano)) : new Date().getFullYear();
+              const currentYear = new Date().getFullYear();
+              const lastYear = fiscalYears.length > 0 ? Math.max(...fiscalYears.map(f => f.ano)) : (currentYear - 1);
               const nextYear = lastYear + 1;
               if (confirm(`Deseja iniciar o Ano Fiscal de ${nextYear}?`)) {
                 try {
