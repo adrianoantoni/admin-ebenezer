@@ -35,11 +35,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       >
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 shrink-0">
           <div className={`flex items-center gap-3 overflow-hidden ${!isOpen && 'md:justify-center w-full'}`}>
-            <div className="bg-amber-500 p-1.5 rounded-lg shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden">
+            <div className="shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden">
               {state.churchSettings?.logo ? (
-                <img src={state.churchSettings.logo} alt="Logo" className="w-full h-full object-cover rounded" />
+                <img src={state.churchSettings.logo} alt="Logo" className="w-full h-full object-contain rounded-lg" />
               ) : (
-                <Church size={isOpen ? 24 : 20} className="text-white" />
+                <div className="bg-amber-500 p-2 rounded-lg">
+                  <Church size={isOpen ? 24 : 20} className="text-white" />
+                </div>
               )}
             </div>
             {isOpen && (
