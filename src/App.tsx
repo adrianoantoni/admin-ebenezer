@@ -6,6 +6,7 @@ import Sidebar from './components/Layout/Sidebar.tsx';
 import Header from './components/Layout/Header.tsx';
 import ToastContainer from './components/Layout/ToastContainer.tsx';
 import SOCAssistant from './components/Layout/SOCAssistant.tsx';
+import Home from './pages/Home.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import Members from './pages/Members.tsx';
 import Finance from './pages/Finance.tsx';
@@ -59,9 +60,9 @@ export default function App() {
     <AppProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/" element={<PrivateRoute><MainLayout><Dashboard /></MainLayout></PrivateRoute>} />
           <Route path="/dashboard" element={<PrivateRoute><MainLayout><Dashboard /></MainLayout></PrivateRoute>} />
           <Route path="/members" element={<PrivateRoute><MainLayout><Members /></MainLayout></PrivateRoute>} />
           <Route path="/cells" element={<PrivateRoute><MainLayout><Cells /></MainLayout></PrivateRoute>} />
