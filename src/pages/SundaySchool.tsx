@@ -255,7 +255,7 @@ const SundaySchool: React.FC = () => {
             </tbody>
           </table>
           <div class="footer">
-            Gerado por ${state.churchSettings?.nomeIgreja || 'Eclesia Master'} em ${new Date().toLocaleString()}
+            Gerado por ${state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'} em ${new Date().toLocaleString()}
           </div>
         </body>
       </html>

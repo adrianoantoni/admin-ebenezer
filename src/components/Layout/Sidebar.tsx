@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             </div>
             {isOpen && (
               <span className="font-poppins font-bold text-base whitespace-nowrap truncate flex-1">
-                {state.churchSettings?.nomeIgreja || 'Eclesia Master'}
+                {state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'}
               </span>
             )}
           </div>

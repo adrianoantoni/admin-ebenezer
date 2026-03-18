@@ -8,7 +8,7 @@ interface SEOProps {
 
 const SEO: React.FC<SEOProps> = ({ title, description }) => {
     const { state } = useApp();
-    const churchName = state.churchSettings?.nomeIgreja || 'Eclesia Master';
+    const churchName = state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú';
 
     useEffect(() => {
         const fullTitle = `${title} | ${churchName}`;

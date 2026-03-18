@@ -27,7 +27,7 @@ import { useApp } from './context/AppContext.tsx';
 
 const PrivateRoute = ({ children }: { children?: React.ReactNode }) => {
   const { state } = useApp();
-  if (state.auth.loading) return <div className="h-screen w-screen flex items-center justify-center bg-blue-50 text-blue-900 font-bold italic">Carregando Ecclésia Master...</div>;
+  if (state.auth.loading) return <div className="h-screen w-screen flex items-center justify-center bg-blue-50 text-blue-900 font-bold italic">Iniciando {state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'}...</div>;
   return state.auth.isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 

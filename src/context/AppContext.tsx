@@ -58,7 +58,7 @@ interface ExtendedAppState extends AppState {
 }
 
 const defaultChurchSettings: ChurchSettings = {
-  nomeIgreja: 'Ecclésia Master',
+  nomeIgreja: 'Igreja Baptista da Sapú',
   sigla: 'IBS',
   cnpj: '00.000.000/0001-00',
   dataFundacao: '2010-01-01',
@@ -105,7 +105,10 @@ const appReducer = (state: ExtendedAppState, action: Action): ExtendedAppState =
         ...state,
         ...action.payload,
         auth: { ...state.auth, loading: false },
-        churchSettings: action.payload.churchSettings || state.churchSettings
+        churchSettings: {
+          ...state.churchSettings,
+          ...(action.payload.churchSettings || {})
+        }
       };
     case 'LOGIN_SUCCESS':
       return { ...state, auth: { user: action.payload, isAuthenticated: true, loading: false } };

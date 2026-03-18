@@ -88,14 +88,14 @@ const AuditLogs: React.FC = () => {
   const handleSystemBackup = () => {
     const backupPayload = {
       timestamp: new Date().toISOString(),
-      metadata: { source: `${state.churchSettings?.nomeIgreja || 'Eclesia Master'} SOC Console`, version: "3.0" },
+      metadata: { source: `${state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'} SOC Console`, version: "3.0" },
       data: state
     };
     const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${state.churchSettings?.nomeIgreja || 'Eclesia Master'}_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${state.churchSettings?.nomeIgreja || 'Igreja Baptista da Sapú'}_Backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
