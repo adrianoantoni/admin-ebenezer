@@ -20,29 +20,37 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     console.log(`🔵 Usando JWT_SECRET: ${JWT_SECRET === 'eclesia-secret-key-2025' ? 'DEFAULT' : 'ENV_FILE'}`);
 
     try {
+        const sanitizedEmail = email.trim().toLowerCase();
         const user = await (prisma as any).usuario.findFirst({
             where: {
                 email: {
-                    equals: email,
+                    equals: sanitizedEmail,
                     mode: 'insensitive'
                 }
             },
         });
 
         if (!user) {
-            console.log(`❌ Login falhou: Usuário não encontrado no banco (${email})`);
+            console.log(`❌ Login falhou: Usuário não encontrado no banco (${sanitizedEmail})`);
             return res.status(401).json({ message: 'E-mail não cadastrado no sistema.' });
         }
 
         console.log(`✅ Usuário encontrado: ${user.nome} (ID: ${user.idUsuario})`);
+        console.log(`🟢 Tentando comparar senha fornecida com hash do banco...`);
 
         const isPasswordValid = await bcrypt.compare(password, user.senha);
-        console.log(`🔵 Comparação de senha: ${isPasswordValid ? 'SUCESSO' : 'FALHA'}`);
-
+        
         if (!isPasswordValid) {
-            console.log(`❌ Login falhou: Senha incorreta para ${email}`);
+            console.log(`❌ Login falhou: Senha incorreta para ${sanitizedEmail}`);
+            // Verificar se por acaso a senha no banco não está com hash (texto plano)
+            if (user.senha === password) {
+                console.log(`⚠️ ALERTA: A senha no banco está em TEXTO PLANO. O sistema exige hash bcrypt.`);
+                return res.status(401).json({ message: 'Erro de segurança: Sua conta precisa ser redefinida.' });
+            }
             return res.status(401).json({ message: 'Senha incorreta. Tente novamente.' });
         }
+
+        console.log(`✅ Login realizado com SUCESSO para ${sanitizedEmail}`);
 
         const token = jwt.sign(
             { userId: user.idUsuario, role: user.perfil },

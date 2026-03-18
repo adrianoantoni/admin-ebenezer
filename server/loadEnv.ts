@@ -33,4 +33,4 @@ if (process.env.NODE_ENV !== 'production') {
     }
 }
 
-export const getJwtSecret = () => process.env.JWT_SECRET || 'eclesia-secret-key-2025';
+export const getJwtSecret = () => (process.env.JWT_SECRET || 'eclesia-secret-key-2025').trim();

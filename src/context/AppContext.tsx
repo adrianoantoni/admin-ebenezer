@@ -230,6 +230,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
           
           // Não deslogar se for a própria rota de login ou refresh
           if (url.includes('/api/') && !url.includes('/login') && !url.includes('/auth/')) {
+            console.warn(`🛑 SESSÃO INVÁLIDA: Rota [${url}] retornou status ${response.status}.`);
             console.log('⚠️ Sessão expirada detectada via Fetch Interceptor. Redirecionando...');
             dispatch({ type: 'LOGOUT' });
             
@@ -247,6 +248,7 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         }
         return response;
       } catch (error) {
+        console.error('💥 ERRO FATAL NO FETCH INTERCEPTOR:', error);
         throw error;
       }
     };
@@ -365,7 +367,12 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
       const { auth, notifications, members, transactions, assets, events, logs, users, cells, schoolClasses, books, songs, scales, mediaTasks, beneficiaries, maintenances, departments, ...dataToSave } = state;
       try {
         localStorage.setItem('eclesia_master_db', JSON.stringify(dataToSave));
-        if (auth.user) localStorage.setItem('user', JSON.stringify(auth.user));
+        if (auth.user) {
+          localStorage.setItem('user', JSON.stringify(auth.user));
+        } else {
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        }
       } catch (e) {
         console.error('Error saving to localStorage:', e);
       }

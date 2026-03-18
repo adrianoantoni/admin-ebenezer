@@ -3,6 +3,9 @@ const { Router } = express;
 import type { Request, Response, NextFunction } from 'express';
 import prisma from '../db.js';
 import { authenticateToken, authorizeRoles } from '../middleware/auth.js';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import { sendResetPasswordEmail } from '../utils/email.service.js';
 
 const router = Router();
 
@@ -31,12 +34,6 @@ router.get('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request,
     }
 });
 
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
-import { sendResetPasswordEmail } from '../utils/email.service.js';
-
-// ... (LISTAR USUÁRIOS remains as is)
-
 // CRIAR USUÁRIO
 router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request, res: Response, next: NextFunction) => {
     const { nome, email, senha, perfil } = req.body;
@@ -45,7 +42,7 @@ router.post('/', authenticateToken, authorizeRoles('ADMIN'), async (req: Request
         const newUser = await (prisma as any).usuario.create({
             data: {
                 nome,
-                email: email.toLowerCase(),
+                email: email.trim().toLowerCase(),
                 senha: hashedPassword,
                 perfil: perfil || 'MEMBRO',
                 photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=random`
@@ -71,7 +68,7 @@ router.put('/:id', authenticateToken, authorizeRoles('ADMIN'), async (req: Reque
     try {
         const updateData: any = {
             nome,
-            email: email.toLowerCase(),
+            email: email.trim().toLowerCase(),
             perfil
         };
 
