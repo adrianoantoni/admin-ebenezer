@@ -220,57 +220,61 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           {/* Adicionado h-[350px] e min-h-[350px] para garantir espaço para o Recharts */}
-          <div className="w-full h-[350px] min-h-[350px] overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={200}>
-              <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
-                  dy={15}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
-                  dx={-10}
-                />
-                <Tooltip
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', padding: '16px' }}
-                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="dizimos" name="Dízimos" fill="#1e40af" radius={[6, 6, 0, 0]} barSize={24} />
-                <Bar dataKey="ofertas" name="Ofertas" fill="#f59e0b" radius={[6, 6, 0, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="w-full h-[350px] min-h-[350px] relative overflow-hidden">
+            {barData.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%" debounce={100}>
+                <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
+                    dy={15}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
+                    dx={-10}
+                  />
+                  <Tooltip
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', padding: '16px' }}
+                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                  />
+                  <Bar dataKey="dizimos" name="Dízimos" fill="#1e40af" radius={[6, 6, 0, 0]} barSize={24} />
+                  <Bar dataKey="ofertas" name="Ofertas" fill="#f59e0b" radius={[6, 6, 0, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
         <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100 flex flex-col">
           <h2 className="text-xl font-black text-gray-800 mb-2 tracking-tight">Distribuição Bruta</h2>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-10">Acumulado de {selectedYear}</p>
-          <div className="flex-1 h-[300px] min-h-[300px] overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={200}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={75}
-                  outerRadius={100}
-                  paddingAngle={8}
-                  dataKey="value"
-                  animationBegin={0}
-                  animationDuration={1500}
-                >
-                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="flex-1 h-[300px] min-h-[300px] relative overflow-hidden">
+            {pieData.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%" debounce={100}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={75}
+                    outerRadius={100}
+                    paddingAngle={8}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={1500}
+                  >
+                    {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
           <div className="mt-8 space-y-4">
             {pieData.map((item, idx) => (

@@ -107,7 +107,7 @@ const Login: React.FC = () => {
             <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center shadow-xl shadow-amber-500/30 rotate-6 mb-6">
               <Church size={40} className="text-white -rotate-6" />
             </div>
-            <h1 className="text-3xl font-poppins font-black text-gray-800 tracking-tight">Igreja Baptista da Sapú</h1>
+            <h1 className="text-3xl font-poppins font-black text-gray-800 tracking-tight">Ecclésia Master</h1>
             <p className="text-gray-400 font-medium text-center mt-2 px-6">
               Gestão inteligente para o corpo de Cristo
             </p>

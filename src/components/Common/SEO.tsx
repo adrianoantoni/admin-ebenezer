@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
 
 interface SEOProps {
     title: string;
@@ -6,8 +7,11 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({ title, description }) => {
+    const { state } = useApp();
+    const churchName = state.churchSettings?.nomeIgreja || 'Eclesia Master';
+
     useEffect(() => {
-        const fullTitle = `${title} | Igreja Baptista da Sapú`;
+        const fullTitle = `${title} | ${churchName}`;
         document.title = fullTitle;
 
         if (description) {

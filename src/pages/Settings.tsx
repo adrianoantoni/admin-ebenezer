@@ -112,14 +112,14 @@ const SettingsPage: React.FC = () => {
   const handleBackup = () => {
     const backupData = {
       timestamp: new Date().toISOString(),
-      app: "Igreja Baptista da Sapú",
+      app: `${state.churchSettings?.nomeIgreja || 'Eclesia Master'}`,
       data: state
     };
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Igreja Baptista da Sapú_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${state.churchSettings?.nomeIgreja || 'Eclesia Master'}_Backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -58,7 +58,7 @@ interface ExtendedAppState extends AppState {
 }
 
 const defaultChurchSettings: ChurchSettings = {
-  nomeIgreja: 'Igreja Baptista da Sapú',
+  nomeIgreja: 'Ecclésia Master',
   sigla: 'IBS',
   cnpj: '00.000.000/0001-00',
   dataFundacao: '2010-01-01',
@@ -216,6 +216,12 @@ const AppContext = createContext<{ state: ExtendedAppState; dispatch: React.Disp
 
 export const AppProvider = ({ children }: { children?: ReactNode }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [debugLogs, setDebugLogs] = React.useState<string[]>([]);
+
+  const logDebug = (msg: string) => {
+    console.log(`[DEBUG] ${msg}`);
+    setDebugLogs(prev => [msg, ...prev].slice(0, 10));
+  };
 
   // Intercetador Global de Fetch para expiração de sessão
   useEffect(() => {
@@ -230,13 +236,18 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
           
           // Não deslogar se for a própria rota de login ou refresh
           if (url.includes('/api/') && !url.includes('/login') && !url.includes('/auth/')) {
-            console.error(`🛑 SESSÃO INVÁLIDA: Rota [${url}] retornou status ${response.status}.`);
+            const errorMsg = `🛑 SESSÃO INVÁLIDA: Rota [${url}] retornou status ${response.status}.`;
+            console.error(errorMsg);
             
-            // Notificar o usuário visualmente
+            // Nuclear alert if persistent issue
+            if (window.location.hostname !== 'localhost') {
+              // window.alert(errorMsg); // Comentado para não ser intrusivo demais, mas pronto para ativar
+            }
+
             dispatch({ 
               type: 'ADD_NOTIFICATION', 
               payload: { 
-                message: response.status === 401 ? 'Sessão expirada. Entre novamente.' : 'Acesso negado: Token inválido.', 
+                message: response.status === 401 ? 'Sessão expirada ou Token inválido. Entre novamente.' : 'Acesso negado: Permissão insuficiente.', 
                 type: 'error' 
               } 
             });
@@ -286,25 +297,25 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         };
 
         const currentYear = new Date().getFullYear();
-        const [
-          members, tithes, offerings, expenses, inventory, events,
-          marriages, departments, schoolClasses, libraryBooks, settings, users, auditLogs, social
-        ] = await Promise.all([
-          safeFetch('/api/members'),
-          safeFetch(`/api/finance/tithes?year=${currentYear}`),
-          safeFetch(`/api/finance/offerings?year=${currentYear}`),
-          safeFetch(`/api/finance/expenses?year=${currentYear}`),
-          safeFetch('/api/inventory'),
-          safeFetch('/api/events'),
-          safeFetch('/api/marriages'),
-          safeFetch('/api/departments'),
-          safeFetch('/api/school/classes'),
-          safeFetch('/api/library/books'),
-          safeFetch('/api/settings'),
-          safeFetch('/api/users'),
-          safeFetch('/api/audit'),
-          safeFetch('/api/social')
-        ]);
+        console.log('🔄 Iniciando fetchData sequencial para estabilidade...');
+        
+        // Fetch sequencial para evitar gargalos no Vercel/Prisma
+        const members = await safeFetch('/api/members');
+        const tithes = await safeFetch(`/api/tithes?year=${currentYear}`);
+        const offerings = await safeFetch(`/api/offerings?year=${currentYear}`);
+        const expenses = await safeFetch(`/api/expenses?year=${currentYear}`);
+        const inventory = await safeFetch('/api/inventory');
+        const events = await safeFetch('/api/events');
+        const marriages = await safeFetch('/api/marriages');
+        const departments = await safeFetch('/api/departments');
+        const schoolClasses = await safeFetch('/api/school/classes');
+        const libraryBooks = await safeFetch('/api/library/books');
+        const settings = await safeFetch('/api/settings');
+        const users = await safeFetch('/api/users');
+        const auditLogs = await safeFetch('/api/audit');
+        const social = await safeFetch('/api/social');
+
+        console.log('✅ fetchData concluído com sucesso.');
 
         console.log('--- SYNC DEBUG ---');
         console.log('Members:', members?.length || 0);
@@ -380,6 +391,20 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       {children}
+      {/* Debug Console Overlay - Solo visível se houver erro ou em dev */}
+      {debugLogs.length > 0 && (
+        <div className="fixed bottom-4 right-4 z-[9999] bg-black/90 text-white p-4 rounded-2xl max-w-sm text-[10px] font-mono shadow-2xl border border-white/20 pointer-events-none opacity-80">
+          <div className="flex justify-between mb-2 pb-2 border-b border-white/10">
+            <span className="font-black text-blue-400">CONSOLE DE DIAGNÓSTICO</span>
+            <button className="pointer-events-auto" onClick={() => setDebugLogs([])}>✕</button>
+          </div>
+          {debugLogs.map((log, i) => (
+            <div key={i} className="mb-1 last:mb-0 break-words line-clamp-2">
+              <span className="text-gray-500">[{new Date().toLocaleTimeString()}]</span> {log}
+            </div>
+          ))}
+        </div>
+      )}
     </AppContext.Provider>
   );
 };
