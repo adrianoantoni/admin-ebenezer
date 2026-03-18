@@ -19,48 +19,49 @@ const Login: React.FC = () => {
   const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
     try {
+      console.log(`🔵 Tentando login para: ${email.trim().toLowerCase()}`);
+      
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('❌ Resposta do servidor não é JSON:', text.substring(0, 100));
+        throw new Error(`Servidor retornou erro ${response.status}: Resposta inesperada.`);
+      }
 
       if (!response.ok) {
+        console.error(`❌ Falha no login (${response.status}):`, data.message);
         dispatch({ type: 'ADD_NOTIFICATION', payload: { message: data.message || 'Erro ao realizar login', type: 'error' } });
         setLoading(false);
         return;
       }
 
+      console.log('✅ Login autorizado. Salvando sessão...');
       const { user, token } = data;
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
       dispatch({ type: 'LOGIN_SUCCESS', payload: user });
 
-      dispatch({
-        type: 'ADD_LOG',
-        payload: {
-          id: Math.random().toString(),
-          userId: user.id,
-          userName: user.name,
-          action: 'LOGIN',
-          category: 'LOGIN',
-          severity: 'LOW',
-          target: 'Sistema',
-          timestamp: new Date().toISOString(),
-          ip: '127.0.0.1'
-        }
-      });
       navigate('/dashboard');
     } catch (error: any) {
-      console.error('Login error:', error);
-      let errorMsg = 'Erro desconhecido ao conectar com o servidor.';
+      console.error('💥 Erro crítico no Login:', error);
+      let errorMsg = error.message || 'Erro desconhecido ao conectar com o servidor.';
 
-      // Detectar erro de conexão (servidor off)
-      if (error instanceof TypeError || error.name === 'TypeError' || error.message?.includes('Failed to fetch')) {
-        errorMsg = 'SERVIDOR OFFLINE 🔴: Verifique se o backend está rodando no terminal (npm run dev:all).';
+      if (error.name === 'TypeError' || error.message?.includes('Failed to fetch')) {
+        errorMsg = 'SERVIDOR OFFLINE 🔴: Verifique seu banco de dados e conexão (Vercel).';
       }
 
       dispatch({ type: 'ADD_NOTIFICATION', payload: { message: errorMsg, type: 'error' } });

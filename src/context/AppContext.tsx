@@ -110,7 +110,7 @@ const appReducer = (state: ExtendedAppState, action: Action): ExtendedAppState =
     case 'LOGIN_SUCCESS':
       return { ...state, auth: { user: action.payload, isAuthenticated: true, loading: false } };
     case 'LOGOUT':
-      return { ...initialState, auth: { user: null, isAuthenticated: false, loading: false } };
+      return { ...initialState, auth: { user: null, isAuthenticated: false, loading: false }, notifications: state.notifications };
 
     case 'UPDATE_AUTH_USER':
       return {
@@ -230,20 +230,18 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
           
           // Não deslogar se for a própria rota de login ou refresh
           if (url.includes('/api/') && !url.includes('/login') && !url.includes('/auth/')) {
-            console.warn(`🛑 SESSÃO INVÁLIDA: Rota [${url}] retornou status ${response.status}.`);
-            console.log('⚠️ Sessão expirada detectada via Fetch Interceptor. Redirecionando...');
-            dispatch({ type: 'LOGOUT' });
+            console.error(`🛑 SESSÃO INVÁLIDA: Rota [${url}] retornou status ${response.status}.`);
             
-            // Notificar apenas uma vez (evitar spam de mensagens)
-            if (!state.notifications.some(n => n.message.includes('Sessão expirada'))) {
-              dispatch({ 
-                type: 'ADD_NOTIFICATION', 
-                payload: { 
-                  message: 'Sua sessão expirou devido a inatividade. Por favor, entre novamente.', 
-                  type: 'error' 
-                } 
-              });
-            }
+            // Notificar o usuário visualmente
+            dispatch({ 
+              type: 'ADD_NOTIFICATION', 
+              payload: { 
+                message: response.status === 401 ? 'Sessão expirada. Entre novamente.' : 'Acesso negado: Token inválido.', 
+                type: 'error' 
+              } 
+            });
+
+            dispatch({ type: 'LOGOUT' });
           }
         }
         return response;
