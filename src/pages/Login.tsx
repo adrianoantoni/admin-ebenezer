@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ArrowLeft, Church, Lock, Mail, Eye, EyeOff, X, Send, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useNavigate, Link } from 'react-router-dom';

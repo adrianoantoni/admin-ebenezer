@@ -304,9 +304,9 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         
         // Fetch sequencial para evitar gargalos no Vercel/Prisma
         const members = await safeFetch('/api/members');
-        const tithes = await safeFetch(`/api/tithes?year=${currentYear}`);
-        const offerings = await safeFetch(`/api/offerings?year=${currentYear}`);
-        const expenses = await safeFetch(`/api/expenses?year=${currentYear}`);
+        const tithes = await safeFetch(`/api/finance/tithes?year=${currentYear}`);
+        const offerings = await safeFetch(`/api/finance/offerings?year=${currentYear}`);
+        const expenses = await safeFetch(`/api/finance/expenses?year=${currentYear}`);
         const inventory = await safeFetch('/api/inventory');
         const events = await safeFetch('/api/events');
         const marriages = await safeFetch('/api/marriages');
