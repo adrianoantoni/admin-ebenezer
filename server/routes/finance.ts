@@ -590,11 +590,14 @@ router.get('/stats/debt', authenticateToken, async (req: Request, res: Response,
         const currentYearStart = new Date(Date.UTC(today.getUTCFullYear(), 0, 1, 0, 0, 0));
         const currentYearEnd = new Date(Date.UTC(today.getUTCFullYear(), 11, 31, 23, 59, 59));
 
-        // 1. Buscar apenas membros elegíveis e apenas os dízimos pagos DESTE ANO
+        // 1. Buscar membros devedores potenciais (Trabalhadores e Negócios)
         const members = await (prisma as any).membro.findMany({
             where: {
                 ativo: true,
-                valorDizimoEsperado: { gt: 0 }
+                valorDizimoEsperado: { gt: 0 },
+                situacaoProfissional: {
+                    in: ['TRABALHADOR', 'NEGOCIO']
+                }
             },
             select: {
                 idMembro: true,
@@ -603,15 +606,9 @@ router.get('/stats/debt', authenticateToken, async (req: Request, res: Response,
                 dataConversao: true,
                 criadoEm: true,
                 dizimos: {
-                    where: {
-                        status: 'PAGO',
-                        dataReferencia: {
-                            gte: currentYearStart,
-                            lte: currentYearEnd
-                        }
-                    },
                     select: {
-                        dataReferencia: true
+                        dataReferencia: true,
+                        status: true
                     }
                 }
             }
@@ -633,19 +630,30 @@ router.get('/stats/debt', authenticateToken, async (req: Request, res: Response,
             // Meses até hoje
             const monthsToDate = (today.getUTCFullYear() - effectiveStart.getUTCFullYear()) * 12 + (today.getUTCMonth() - effectiveStart.getUTCMonth()) + 1;
             
-            // Verificar quais meses foram pagos
+            // Calcular dízimos não pagos para o ANO INTEIRO
             let unpaidCount = 0;
-            for (let i = 0; i < monthsToDate; i++) {
-                const checkDate = new Date(effectiveStart);
-                checkDate.setMonth(effectiveStart.getMonth() + i);
+            const todayISO = today.toISOString().substring(0, 7); // "YYYY-MM"
+            const effectiveStartISO = effectiveStart.toISOString().substring(0, 7);
+
+            for (let m = 0; m < 12; m++) {
+                const checkDate = new Date(Date.UTC(today.getUTCFullYear(), m, 1));
+                const checkDateISO = checkDate.toISOString().substring(0, 7);
                 
-                const hasPaid = member.dizimos.some((t: any) => {
-                    const ref = new Date(t.dataReferencia);
-                    return ref.getUTCFullYear() === checkDate.getUTCFullYear() && 
-                           ref.getUTCMonth() === checkDate.getUTCMonth();
+                const record = member.dizimos.find((t: any) => {
+                    const refISO = new Date(t.dataReferencia).toISOString().substring(0, 7);
+                    return refISO === checkDateISO;
                 });
 
-                if (!hasPaid) unpaidCount++;
+                if (!record) {
+                    // O usuário deseja que conte como dívida para o ANO INTEIRO (12 meses)
+                    // se o dízimo ainda não foi registrado nem pago.
+                    if (checkDateISO < effectiveStartISO) continue;
+                    
+                    unpaidCount++;
+                } else if (record.status !== 'PAGO' && record.status !== 'ISENTO') {
+                    // Se HÁ registo e não está verde, é dívida!
+                    unpaidCount++;
+                }
             }
 
             if (unpaidCount > 0) {

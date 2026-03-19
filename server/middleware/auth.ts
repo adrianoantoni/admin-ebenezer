@@ -21,14 +21,26 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     const JWT_SECRET = getJwtSecret();
     console.log(`🔵 Middleware Auth: Verificando token (Secret: ${JWT_SECRET === 'eclesia-secret-key-2025' ? 'DEFAULT' : 'ENV_LOADED'})`);
 
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
         if (err) {
             console.error('❌ Middleware Auth: Falha na verificação do JWT:', err.message);
-            console.log('Token recebido:', token.substring(0, 15) + '...');
+            if (err.name === 'TokenExpiredError') {
+                const expiredAt = new Date(err.expiredAt).toLocaleString();
+                console.log(`⏰ Token expirou em: ${expiredAt}. Hora atual: ${new Date().toLocaleString()}`);
+            }
             return res.status(403).json({ message: 'Token inválido ou expirado' });
         }
-        console.log(`✅ Middleware Auth: Acesso concedido para usuário ${user.userId}`);
-        req.user = user;
+        
+        // Log para depuração de tempo se necessário
+        if (decoded.exp) {
+            const expDate = new Date(decoded.exp * 1000);
+            if (expDate < new Date()) {
+                 console.warn(`⚠️ Token teoricamente válido mas expira no PASSADO: ${expDate.toLocaleString()}`);
+            }
+        }
+
+        console.log(`✅ Middleware Auth: Acesso concedido para usuário ${decoded.userId}`);
+        req.user = decoded;
         next();
     });
 };

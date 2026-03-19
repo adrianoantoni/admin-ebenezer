@@ -250,12 +250,14 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
             dispatch({ 
               type: 'ADD_NOTIFICATION', 
               payload: { 
-                message: response.status === 401 ? 'Sessão expirada ou Token inválido. Entre novamente.' : 'Acesso negado: Permissão insuficiente.', 
+                message: response.status === 401 ? 'Sessão expirada ou Token inválido. Entre novamente.' : 'Acesso negado: Você não tem permissão para visualizar estes dados.', 
                 type: 'error' 
               } 
             });
 
-            dispatch({ type: 'LOGOUT' });
+            if (response.status === 401) {
+              dispatch({ type: 'LOGOUT' });
+            }
           }
         }
         return response;
@@ -314,9 +316,15 @@ export const AppProvider = ({ children }: { children?: ReactNode }) => {
         const schoolClasses = await safeFetch('/api/school/classes');
         const libraryBooks = await safeFetch('/api/library/books');
         const settings = await safeFetch('/api/settings');
-        const users = await safeFetch('/api/users');
-        const auditLogs = await safeFetch('/api/audit');
         const social = await safeFetch('/api/social');
+
+        // Apenas ADMIN pode ver usuários e logs de auditoria
+        let users = null;
+        let auditLogs = null;
+        if (state.auth.user?.role === 'SUPER_ADMIN' || state.auth.user?.role === 'ADMIN') {
+          users = await safeFetch('/api/users');
+          auditLogs = await safeFetch('/api/audit');
+        }
 
         console.log('✅ fetchData concluído com sucesso.');
 

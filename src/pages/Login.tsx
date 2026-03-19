@@ -54,7 +54,12 @@ const Login: React.FC = () => {
       localStorage.setItem('token', token);
       dispatch({ type: 'LOGIN_SUCCESS', payload: user });
 
-      navigate('/dashboard');
+      // Redirecionar baseado no papel
+      if (user.role === 'TREASURER') {
+        navigate('/members');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('💥 Erro crítico no Login:', error);
       let errorMsg = error.message || 'Erro desconhecido ao conectar com o servidor.';
