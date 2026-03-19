@@ -97,25 +97,24 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-mesh animate-pulse-soft flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative Blur Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-float"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-float" style={{ animationDelay: '2s' }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle Background pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e40af 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
 
       <div className="w-full max-w-md z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="glass-card rounded-[2.5rem] shadow-2xl p-8 md:p-12 relative overflow-hidden border border-white/20">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+        <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 md:p-12 relative overflow-hidden border border-gray-100">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-50"></div>
           
-          <Link to="/" className="absolute top-6 left-6 p-2 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full border border-white/10 group">
+          <Link to="/" className="absolute top-6 left-6 p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-100 group">
             <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
           </Link>
-
+          
           <div className="flex flex-col items-center mb-10">
-            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl flex items-center justify-center shadow-xl shadow-amber-500/30 rotate-6 mb-6">
-              <Church size={40} className="text-white -rotate-6" />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl flex items-center justify-center shadow-xl shadow-blue-500/20 mb-6">
+              <Church size={40} className="text-white" />
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight text-center">Igreja Baptista da Sapú</h1>
-            <p className="text-blue-200/60 font-medium text-center mt-2 px-6 text-sm">
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight text-center">Igreja Baptista da Sapú</h1>
+            <p className="text-gray-500 font-medium text-center mt-2 px-6 text-sm">
               Gestão inteligente para o corpo de Cristo
             </p>
           </div>
@@ -129,7 +128,7 @@ const Login: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition-all font-medium text-gray-700"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition-all font-medium text-gray-700 shadow-sm"
                   placeholder="seu@email.com"
                   required
                 />
@@ -153,7 +152,7 @@ const Login: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition-all font-medium text-gray-700"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition-all font-medium text-gray-700 shadow-sm"
                   placeholder="••••••••"
                   required
                 />
@@ -170,7 +169,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-700/30 transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -185,19 +184,19 @@ const Login: React.FC = () => {
               Não tem acesso? <span className="text-blue-600 font-bold cursor-pointer hover:underline">Solicite ao administrador</span>
             </p>
 
-            {/* Dev Banner - Mostra credenciais apenas em ambiente dev */}
-            <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200 text-left animate-in fade-in slide-in-from-bottom-4">
-              <p className="text-[10px] font-black text-yellow-600 uppercase mb-2 tracking-widest flex items-center gap-2">
+            {/* Dev Banner */}
+            <div className="mt-6 p-4 bg-blue-50/50 rounded-xl border border-blue-100 text-left animate-in fade-in slide-in-from-bottom-4">
+              <p className="text-[10px] font-black text-blue-600 uppercase mb-2 tracking-widest flex items-center gap-2">
                 <Lock size={10} /> Ambiente de Desenvolvimento
               </p>
-              <div className="text-xs text-yellow-800 font-mono space-y-1.5">
-                <div className="flex justify-between border-b border-yellow-200 pb-1">
+              <div className="text-xs text-blue-900/70 font-mono space-y-1.5">
+                <div className="flex justify-between border-b border-blue-100 pb-1">
                   <span>Admin:</span>
-                  <span className="font-bold select-all">adriano@test.com / admin123</span>
+                  <span className="font-bold select-all text-blue-900">adriano@test.com / admin123</span>
                 </div>
                 <div className="flex justify-between pt-1">
                   <span>Pastor:</span>
-                  <span className="font-bold select-all">carlos@test.com / admin123</span>
+                  <span className="font-bold select-all text-blue-900">carlos@test.com / admin123</span>
                 </div>
               </div>
             </div>
