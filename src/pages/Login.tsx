@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import { ArrowLeft, Church, Lock, Mail, Eye, EyeOff, X, Send, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { useNavigate } from 'react-router-dom';
-import { UserRole } from '../core/types';
-import { Church, Lock, Mail, Eye, EyeOff, X, Send, CheckCircle2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const { dispatch } = useApp();
@@ -98,17 +96,25 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-12 relative overflow-hidden">
+    <div className="min-h-screen bg-mesh animate-pulse-soft flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative Blur Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] animate-float"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-float" style={{ animationDelay: '2s' }}></div>
+
+      <div className="w-full max-w-md z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="glass-card rounded-[2.5rem] shadow-2xl p-8 md:p-12 relative overflow-hidden border border-white/20">
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+          
+          <Link to="/" className="absolute top-6 left-6 p-2 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full border border-white/10 group">
+            <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+          </Link>
 
           <div className="flex flex-col items-center mb-10">
-            <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center shadow-xl shadow-amber-500/30 rotate-6 mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl flex items-center justify-center shadow-xl shadow-amber-500/30 rotate-6 mb-6">
               <Church size={40} className="text-white -rotate-6" />
             </div>
-            <h1 className="text-3xl font-poppins font-black text-gray-800 tracking-tight">Igreja Baptista da Sapú</h1>
-            <p className="text-gray-400 font-medium text-center mt-2 px-6">
+            <h1 className="text-3xl font-black text-white tracking-tight text-center">Igreja Baptista da Sapú</h1>
+            <p className="text-blue-200/60 font-medium text-center mt-2 px-6 text-sm">
               Gestão inteligente para o corpo de Cristo
             </p>
           </div>
