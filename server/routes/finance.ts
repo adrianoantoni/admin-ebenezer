@@ -633,9 +633,20 @@ router.get('/stats/debt', authenticateToken, async (req: Request, res: Response,
             // Meses até hoje
             const monthsToDate = (today.getUTCFullYear() - effectiveStart.getUTCFullYear()) * 12 + (today.getUTCMonth() - effectiveStart.getUTCMonth()) + 1;
             
-            // Meses efetivamente pagos (contagem simples pois filtramos no banco por este ano)
-            const paidCount = member.dizimos.length;
-            const unpaidCount = Math.max(0, monthsToDate - paidCount);
+            // Verificar quais meses foram pagos
+            let unpaidCount = 0;
+            for (let i = 0; i < monthsToDate; i++) {
+                const checkDate = new Date(effectiveStart);
+                checkDate.setMonth(effectiveStart.getMonth() + i);
+                
+                const hasPaid = member.dizimos.some((t: any) => {
+                    const ref = new Date(t.dataReferencia);
+                    return ref.getUTCFullYear() === checkDate.getUTCFullYear() && 
+                           ref.getUTCMonth() === checkDate.getUTCMonth();
+                });
+
+                if (!hasPaid) unpaidCount++;
+            }
 
             if (unpaidCount > 0) {
                 totalDebt += unpaidCount * expected;
